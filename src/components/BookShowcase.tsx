@@ -5,12 +5,20 @@ import bookCover1 from "@/assets/book-cover-1.jpg";
 import bookCover2 from "@/assets/book-cover-2.jpg";
 import bookCover3 from "@/assets/book-cover-3.jpg";
 import bookCover4 from "@/assets/book-cover-4.jpg";
+import bookCover5 from "@/assets/book-cover-5.jpg";
+import bookCover6 from "@/assets/book-cover-6.jpg";
+import bookCover7 from "@/assets/book-cover-7.jpg";
+import bookCover8 from "@/assets/book-cover-8.jpg";
 
 const books = [
   { img: bookCover1, title: "The Adventures of Emma", theme: "Enchanted Forest" },
   { img: bookCover2, title: "Leo's Sky Adventure", theme: "Dragon Rider" },
   { img: bookCover3, title: "Mia's Ocean Quest", theme: "Underwater Kingdom" },
   { img: bookCover4, title: "Sam's Space Journey", theme: "Outer Space" },
+  { img: bookCover5, title: "Jake's Hero Story", theme: "Superhero City" },
+  { img: bookCover6, title: "Dino Discovery", theme: "Dinosaur World" },
+  { img: bookCover7, title: "Lily's Magic Garden", theme: "Fairy Garden" },
+  { img: bookCover8, title: "Captain's Treasure", theme: "Pirate Adventure" },
 ];
 
 const BookShowcase = () => (
