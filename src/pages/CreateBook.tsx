@@ -10,12 +10,20 @@ import bookCover1 from "@/assets/book-cover-1.jpg";
 import bookCover2 from "@/assets/book-cover-2.jpg";
 import bookCover3 from "@/assets/book-cover-3.jpg";
 import bookCover4 from "@/assets/book-cover-4.jpg";
+import bookCover5 from "@/assets/book-cover-5.jpg";
+import bookCover6 from "@/assets/book-cover-6.jpg";
+import bookCover7 from "@/assets/book-cover-7.jpg";
+import bookCover8 from "@/assets/book-cover-8.jpg";
 
 const themes = [
   { id: "forest", label: "Enchanted Forest", img: bookCover1, emoji: "🌳" },
   { id: "sky", label: "Sky Adventure", img: bookCover2, emoji: "🐉" },
   { id: "ocean", label: "Ocean Quest", img: bookCover3, emoji: "🐠" },
   { id: "space", label: "Space Journey", img: bookCover4, emoji: "🚀" },
+  { id: "superhero", label: "Superhero City", img: bookCover5, emoji: "🦸" },
+  { id: "dinosaur", label: "Dinosaur World", img: bookCover6, emoji: "🦕" },
+  { id: "fairy", label: "Fairy Garden", img: bookCover7, emoji: "🧚" },
+  { id: "pirate", label: "Pirate Adventure", img: bookCover8, emoji: "🏴‍☠️" },
 ];
 
 const ageOptions = ["2-3", "4-5", "6-7", "8-10"];

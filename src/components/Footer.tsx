@@ -1,4 +1,5 @@
 import { Book } from "lucide-react";
+import { Link } from "react-router-dom";
 
 const Footer = () => (
   <footer className="border-t border-border bg-card py-12">
@@ -11,9 +12,9 @@ const Footer = () => (
           <span className="font-display text-lg font-semibold text-foreground">StoryStar</span>
         </div>
         <div className="flex gap-6">
-          <a href="#" className="font-body text-sm text-muted-foreground hover:text-foreground">Privacy</a>
-          <a href="#" className="font-body text-sm text-muted-foreground hover:text-foreground">Terms</a>
-          <a href="#" className="font-body text-sm text-muted-foreground hover:text-foreground">Contact</a>
+          <Link to="/privacy" className="font-body text-sm text-muted-foreground hover:text-foreground">Privacy</Link>
+          <Link to="/terms" className="font-body text-sm text-muted-foreground hover:text-foreground">Terms</Link>
+          <Link to="/contact" className="font-body text-sm text-muted-foreground hover:text-foreground">Contact</Link>
         </div>
         <p className="font-body text-xs text-muted-foreground">© 2026 StoryStar. All rights reserved.</p>
       </div>
