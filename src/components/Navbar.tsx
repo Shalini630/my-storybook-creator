@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Book, Menu, X } from "lucide-react";
+import { Book, Menu, X, LogOut, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
+  const { user, signOut } = useAuth();
 
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
@@ -26,9 +28,26 @@ const Navbar = () => {
           <Link to="/create" className="font-body text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
             Create a Book
           </Link>
-          <Button asChild className="bg-gradient-primary font-body font-semibold text-primary-foreground hover:opacity-90">
-            <Link to="/create">Get Started</Link>
-          </Button>
+          {user ? (
+            <div className="flex items-center gap-3">
+              <span className="flex items-center gap-1.5 font-body text-sm text-muted-foreground">
+                <User className="h-4 w-4" />
+                {user.user_metadata?.full_name || user.email?.split("@")[0]}
+              </span>
+              <Button variant="outline" size="sm" onClick={signOut} className="gap-1.5 font-body text-sm">
+                <LogOut className="h-3.5 w-3.5" /> Sign Out
+              </Button>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2">
+              <Button asChild variant="ghost" size="sm" className="font-body text-sm">
+                <Link to="/auth">Sign In</Link>
+              </Button>
+              <Button asChild className="bg-gradient-primary font-body font-semibold text-primary-foreground hover:opacity-90">
+                <Link to="/create">Get Started</Link>
+              </Button>
+            </div>
+          )}
         </div>
 
         <button className="md:hidden" onClick={() => setOpen(!open)}>
@@ -42,9 +61,20 @@ const Navbar = () => {
             <Link to="/" className="font-body text-sm font-medium text-muted-foreground" onClick={() => setOpen(false)}>How It Works</Link>
             <Link to="/" className="font-body text-sm font-medium text-muted-foreground" onClick={() => setOpen(false)}>Book Gallery</Link>
             <Link to="/create" className="font-body text-sm font-medium text-muted-foreground" onClick={() => setOpen(false)}>Create a Book</Link>
-            <Button asChild className="bg-gradient-primary font-body font-semibold text-primary-foreground">
-              <Link to="/create" onClick={() => setOpen(false)}>Get Started</Link>
-            </Button>
+            {user ? (
+              <Button variant="outline" size="sm" onClick={() => { signOut(); setOpen(false); }} className="gap-1.5 font-body">
+                <LogOut className="h-3.5 w-3.5" /> Sign Out
+              </Button>
+            ) : (
+              <>
+                <Button asChild variant="ghost" size="sm" className="font-body justify-start">
+                  <Link to="/auth" onClick={() => setOpen(false)}>Sign In</Link>
+                </Button>
+                <Button asChild className="bg-gradient-primary font-body font-semibold text-primary-foreground">
+                  <Link to="/create" onClick={() => setOpen(false)}>Get Started</Link>
+                </Button>
+              </>
+            )}
           </div>
         </div>
       )}
