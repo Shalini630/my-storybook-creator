@@ -356,6 +356,7 @@ const CreateBook = () => {
                       <li>🎨 Theme: <span className="font-semibold text-foreground">{themes.find(t => t.id === form.theme)?.label}</span></li>
                       {form.tone && <li>🎭 Tone: <span className="font-semibold text-foreground">{form.tone}</span></li>}
                       {form.bookSize && <li>📐 Size: <span className="font-semibold text-foreground">{form.bookSize}</span></li>}
+                      {form.coverType && <li>📕 Cover: <span className="font-semibold text-foreground">{form.coverType === "softcover" ? "Softcover — ₹999" : "Hardcover — ₹1,299"}</span></li>}
                       {(form.interests || form.hobbies) && <li>⭐ Interests: <span className="font-semibold text-foreground">{form.interests || form.hobbies}</span></li>}
                       {form.photo && <li>📷 Photo: <span className="font-semibold text-foreground">Uploaded ✓</span></li>}
                     </ul>
