@@ -29,9 +29,20 @@ const HeroSection = () => {
             of their own story
           </h1>
 
-          <p className="mb-8 max-w-lg font-body text-lg text-muted-foreground">
+          <p className="mb-4 max-w-lg font-body text-lg text-muted-foreground">
             Answer a few fun questions, and we'll create a beautifully illustrated, fully personalized storybook starring your child. Delivered to your door.
           </p>
+
+          <div className="mb-6 flex items-center gap-4">
+            <div className="rounded-xl border border-border bg-card px-4 py-2 text-center">
+              <p className="font-body text-xs text-muted-foreground">Softcover</p>
+              <p className="font-display text-xl font-bold text-foreground">₹999</p>
+            </div>
+            <div className="rounded-xl border-2 border-primary bg-primary/5 px-4 py-2 text-center">
+              <p className="font-body text-xs text-primary font-semibold">Hardcover</p>
+              <p className="font-display text-xl font-bold text-foreground">₹1,299</p>
+            </div>
+          </div>
 
           <div className="flex flex-wrap items-center gap-4">
             <Button asChild size="lg" className="bg-gradient-primary px-8 font-body text-lg font-bold text-primary-foreground shadow-book hover:opacity-90">
