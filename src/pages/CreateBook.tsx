@@ -293,6 +293,23 @@ const CreateBook = () => {
                     </div>
                   </div>
 
+                  <div>
+                    <Label className="font-body font-semibold">Cover Type</Label>
+                    <div className="mt-1.5 grid grid-cols-2 gap-3">
+                      {[
+                        { id: "softcover" as const, label: "Softcover", price: "₹999", desc: "Lightweight & flexible" },
+                        { id: "hardcover" as const, label: "Hardcover", price: "₹1,299", desc: "Premium & durable" },
+                      ].map(c => (
+                        <button key={c.id} onClick={() => setForm({ ...form, coverType: c.id })}
+                          className={`rounded-xl border-2 p-4 text-left transition-all ${form.coverType === c.id ? "border-primary bg-primary/5 shadow-sm" : "border-border hover:border-primary/50"}`}>
+                          <p className="font-display text-sm font-bold text-foreground">{c.label}</p>
+                          <p className="font-display text-lg font-bold text-primary">{c.price}</p>
+                          <p className="font-body text-xs text-muted-foreground">{c.desc}</p>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
                   {audience === "adult" && (
                     <div>
                       <Label className="font-body font-semibold">Personal Message in the Story (optional)</Label>
