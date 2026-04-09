@@ -54,6 +54,7 @@ const CreateBook = () => {
     theme: "",
     dedication: "",
     bookSize: "",
+    coverType: "" as "" | "softcover" | "hardcover",
     photo: null as File | null,
     photoPreview: "",
     // Kid-specific
