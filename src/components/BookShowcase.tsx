@@ -10,6 +10,14 @@ import bookCover5 from "@/assets/book-cover-5.jpg";
 import bookCover6 from "@/assets/book-cover-6.jpg";
 import bookCover7 from "@/assets/book-cover-7.jpg";
 import bookCover8 from "@/assets/book-cover-8.jpg";
+import adultCover1 from "@/assets/adult-cover-1.jpg";
+import adultCover2 from "@/assets/adult-cover-2.jpg";
+import adultCover3 from "@/assets/adult-cover-3.jpg";
+import adultCover4 from "@/assets/adult-cover-4.jpg";
+import adultCover5 from "@/assets/adult-cover-5.jpg";
+import adultCover6 from "@/assets/adult-cover-6.jpg";
+import adultCover7 from "@/assets/adult-cover-7.jpg";
+import adultCover8 from "@/assets/adult-cover-8.jpg";
 
 const kidBooks = [
   { img: bookCover1, title: "The Adventures of Emma", theme: "Enchanted Forest" },
@@ -23,14 +31,14 @@ const kidBooks = [
 ];
 
 const adultBooks = [
-  { img: bookCover1, title: "Letters to My Love", theme: "Romance" },
-  { img: bookCover2, title: "The Last Clue", theme: "Mystery Thriller" },
-  { img: bookCover3, title: "Wanderlust Diaries", theme: "Travel Memoir" },
-  { img: bookCover4, title: "Beyond the Stars", theme: "Sci-Fi Epic" },
-  { img: bookCover5, title: "Laugh Out Loud", theme: "Comedy & Satire" },
-  { img: bookCover6, title: "My Life, My Story", theme: "Life Story" },
-  { img: bookCover7, title: "The Enchanted Realm", theme: "Fantasy Quest" },
-  { img: bookCover8, title: "Rise & Shine", theme: "Inspirational" },
+  { img: adultCover1, title: "Letters to My Love", theme: "Romance" },
+  { img: adultCover2, title: "The Last Clue", theme: "Mystery Thriller" },
+  { img: adultCover3, title: "Wanderlust Diaries", theme: "Travel Memoir" },
+  { img: adultCover4, title: "Beyond the Stars", theme: "Sci-Fi Epic" },
+  { img: adultCover5, title: "Laugh Out Loud", theme: "Comedy & Satire" },
+  { img: adultCover6, title: "My Life, My Story", theme: "Life Story" },
+  { img: adultCover7, title: "The Enchanted Realm", theme: "Fantasy Quest" },
+  { img: adultCover8, title: "Rise & Shine", theme: "Inspirational" },
 ];
 
 const BookShowcase = () => {
