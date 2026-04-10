@@ -1,6 +1,9 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight, Sparkles, Upload } from "lucide-react";
+import { ArrowLeft, ArrowRight, Sparkles, Upload, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -46,7 +49,10 @@ const bookSizeOptions = ["Standard (8×10)", "Compact (6×8)", "Large (10×12)"]
 const TOTAL_STEPS = 5;
 
 const CreateBook = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [audience, setAudience] = useState<"kid" | "adult" | "">("");
+  const [generating, setGenerating] = useState(false);
   const [step, setStep] = useState(0);
   const [form, setForm] = useState({
     // Shared
@@ -376,8 +382,66 @@ const CreateBook = () => {
                 Next <ArrowRight className="h-4 w-4" />
               </Button>
             ) : (
-              <Button className="gap-2 bg-gradient-coral font-body font-bold text-accent-foreground shadow-book hover:opacity-90">
-                <Sparkles className="h-4 w-4" /> Generate My Book
+              <Button
+                disabled={generating || !form.coverType}
+                onClick={async () => {
+                  setGenerating(true);
+                  try {
+                    const { data: { user } } = await supabase.auth.getUser();
+                    if (!user) {
+                      toast({ title: "Please sign in first", description: "You need an account to generate a book.", variant: "destructive" });
+                      navigate("/auth");
+                      return;
+                    }
+
+                    const price = form.coverType === "hardcover" ? 1299 : 999;
+
+                    const { data: order, error: insertError } = await supabase
+                      .from("orders")
+                      .insert({
+                        user_id: user.id,
+                        audience: audience as string,
+                        name: form.name,
+                        theme: form.theme,
+                        tone: form.tone || null,
+                        book_size: form.bookSize || null,
+                        cover_type: form.coverType,
+                        dedication: form.dedication || null,
+                        personal_message: form.personalMessage || null,
+                        age: form.age || null,
+                        gender: form.gender || null,
+                        interests: form.interests || null,
+                        favorite_character: form.favoriteCharacter || null,
+                        relationship: form.relationship || null,
+                        hobbies: form.hobbies || null,
+                        favorite_memory: form.favoriteMemory || null,
+                        price,
+                        status: "pending",
+                      })
+                      .select()
+                      .single();
+
+                    if (insertError || !order) {
+                      throw new Error(insertError?.message || "Failed to create order");
+                    }
+
+                    // Navigate to preview immediately (it will show loading state)
+                    navigate(`/preview/${order.id}`);
+
+                    // Trigger generation in background
+                    supabase.functions.invoke("generate-book", {
+                      body: { orderId: order.id },
+                    });
+                  } catch (err: any) {
+                    console.error(err);
+                    toast({ title: "Error", description: err.message || "Something went wrong", variant: "destructive" });
+                    setGenerating(false);
+                  }
+                }}
+                className="gap-2 bg-gradient-coral font-body font-bold text-accent-foreground shadow-book hover:opacity-90"
+              >
+                {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
+                {generating ? "Generating..." : "Generate My Book"}
               </Button>
             )}
           </div>
