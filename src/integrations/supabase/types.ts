@@ -14,6 +14,87 @@ export type Database = {
   }
   public: {
     Tables: {
+      orders: {
+        Row: {
+          age: string | null
+          audience: string
+          book_size: string | null
+          cover_type: string
+          created_at: string
+          dedication: string | null
+          favorite_character: string | null
+          favorite_memory: string | null
+          gender: string | null
+          hobbies: string | null
+          id: string
+          illustrations: Json | null
+          interests: string | null
+          name: string
+          personal_message: string | null
+          photo_url: string | null
+          price: number
+          relationship: string | null
+          status: string
+          story_content: Json | null
+          theme: string
+          tone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          age?: string | null
+          audience: string
+          book_size?: string | null
+          cover_type: string
+          created_at?: string
+          dedication?: string | null
+          favorite_character?: string | null
+          favorite_memory?: string | null
+          gender?: string | null
+          hobbies?: string | null
+          id?: string
+          illustrations?: Json | null
+          interests?: string | null
+          name: string
+          personal_message?: string | null
+          photo_url?: string | null
+          price: number
+          relationship?: string | null
+          status?: string
+          story_content?: Json | null
+          theme: string
+          tone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          age?: string | null
+          audience?: string
+          book_size?: string | null
+          cover_type?: string
+          created_at?: string
+          dedication?: string | null
+          favorite_character?: string | null
+          favorite_memory?: string | null
+          gender?: string | null
+          hobbies?: string | null
+          id?: string
+          illustrations?: Json | null
+          interests?: string | null
+          name?: string
+          personal_message?: string | null
+          photo_url?: string | null
+          price?: number
+          relationship?: string | null
+          status?: string
+          story_content?: Json | null
+          theme?: string
+          tone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           avatar_url: string | null
