@@ -1,5 +1,10 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-import { corsHeaders } from "https://esm.sh/@supabase/supabase-js@2.95.0/cors";
+
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers":
+    "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
+};
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -40,7 +45,6 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Fetch order
     const adminClient = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
@@ -60,44 +64,25 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Update status to generating
     await adminClient.from("orders").update({ status: "generating" }).eq("id", orderId);
 
-    // Build prompt based on audience
-    let storyPrompt = "";
-    if (order.audience === "kid") {
-      storyPrompt = `Create a personalized children's storybook for a ${order.gender || "child"} named ${order.name}, aged ${order.age || "5-7"} years old.
-Theme: ${order.theme}
-Tone: ${order.tone || "Adventurous"}
-${order.interests ? `The child loves: ${order.interests}` : ""}
-${order.favorite_character ? `Their favorite character is: ${order.favorite_character}` : ""}
+    // Build prompt
+    const storyPrompt = order.audience === "kid"
+      ? `Create a personalized children's storybook for a ${order.gender || "child"} named ${order.name}, aged ${order.age || "5-7"}.
+Theme: ${order.theme}. Tone: ${order.tone || "Adventurous"}.
+${order.interests ? `Loves: ${order.interests}` : ""}
+${order.favorite_character ? `Favorite character: ${order.favorite_character}` : ""}
 ${order.dedication ? `Dedication: ${order.dedication}` : ""}
-
-Create a story with exactly 6 pages. Each page should have:
-- A page number
-- A short, engaging paragraph (3-5 sentences, age-appropriate)
-- A vivid description of the illustration that should accompany it
-
-Return as JSON with this structure:
-{"title": "string", "pages": [{"pageNumber": 1, "text": "string", "illustrationPrompt": "string"}]}`;
-    } else {
-      storyPrompt = `Create a personalized storybook for an adult named ${order.name}.
-Genre/Theme: ${order.theme}
-Tone: ${order.tone || "Heartfelt"}
-Relationship: ${order.relationship || "For myself"}
-${order.hobbies ? `Hobbies & passions: ${order.hobbies}` : ""}
-${order.favorite_memory ? `A favorite memory to weave in: ${order.favorite_memory}` : ""}
-${order.personal_message ? `Personal touches: ${order.personal_message}` : ""}
+Create exactly 4 pages. Each page: pageNumber, short paragraph (3-5 sentences, age-appropriate), vivid illustration description.
+Return JSON: {"title":"string","pages":[{"pageNumber":1,"text":"string","illustrationPrompt":"string"}]}`
+      : `Create a personalized storybook for an adult named ${order.name}.
+Genre: ${order.theme}. Tone: ${order.tone || "Heartfelt"}. Relationship: ${order.relationship || "For myself"}.
+${order.hobbies ? `Hobbies: ${order.hobbies}` : ""}
+${order.favorite_memory ? `Memory: ${order.favorite_memory}` : ""}
+${order.personal_message ? `Personal: ${order.personal_message}` : ""}
 ${order.dedication ? `Dedication: ${order.dedication}` : ""}
-
-Create a story with exactly 6 pages. Each page should have:
-- A page number
-- An engaging paragraph (4-6 sentences, literary quality)
-- A vivid description of the illustration that should accompany it
-
-Return as JSON with this structure:
-{"title": "string", "pages": [{"pageNumber": 1, "text": "string", "illustrationPrompt": "string"}]}`;
-    }
+Create exactly 4 pages. Each page: pageNumber, engaging paragraph (4-6 sentences), vivid illustration description.
+Return JSON: {"title":"string","pages":[{"pageNumber":1,"text":"string","illustrationPrompt":"string"}]}`;
 
     // Generate story
     const storyResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -109,7 +94,7 @@ Return as JSON with this structure:
       body: JSON.stringify({
         model: "google/gemini-3-flash-preview",
         messages: [
-          { role: "system", content: "You are a creative children's book author and illustrator. Always respond with valid JSON only, no markdown." },
+          { role: "system", content: "You are a creative book author. Always respond with valid JSON only, no markdown." },
           { role: "user", content: storyPrompt },
         ],
         tools: [{
@@ -166,47 +151,45 @@ Return as JSON with this structure:
       });
     }
 
-    // Generate illustrations for each page
-    const illustrations: string[] = [];
-    for (const page of story.pages) {
-      try {
-        const imgResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${LOVABLE_API_KEY}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            model: "google/gemini-3.1-flash-image-preview",
-            messages: [
-              {
-                role: "user",
-                content: `Create a beautiful ${order.audience === "kid" ? "children's book" : "storybook"} illustration: ${page.illustrationPrompt}. Style: colorful, whimsical, high quality book illustration. No text in the image.`,
-              },
-            ],
-            modalities: ["image", "text"],
-          }),
-        });
+    // Generate ALL illustrations in PARALLEL for speed
+    const illustrationPromises = story.pages.map((page: any) =>
+      fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${LOVABLE_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "google/gemini-3.1-flash-image-preview",
+          messages: [
+            {
+              role: "user",
+              content: `Create a beautiful ${order.audience === "kid" ? "children's book" : "storybook"} illustration: ${page.illustrationPrompt}. Style: colorful, whimsical, high quality book illustration. No text in the image.`,
+            },
+          ],
+          modalities: ["image", "text"],
+        }),
+      })
+        .then(async (res) => {
+          if (res.ok) {
+            const data = await res.json();
+            return data.choices?.[0]?.message?.images?.[0]?.image_url?.url || "";
+          }
+          console.error("Image gen failed for page", page.pageNumber, res.status);
+          return "";
+        })
+        .catch((err) => {
+          console.error("Image error:", err);
+          return "";
+        })
+    );
 
-        if (imgResponse.ok) {
-          const imgData = await imgResponse.json();
-          const imageUrl = imgData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
-          illustrations.push(imageUrl || "");
-        } else {
-          console.error("Image generation failed for page", page.pageNumber);
-          illustrations.push("");
-        }
-      } catch (err) {
-        console.error("Image error:", err);
-        illustrations.push("");
-      }
-    }
+    const illustrations = await Promise.all(illustrationPromises);
 
-    // Save to order
     await adminClient.from("orders").update({
       status: "preview",
       story_content: story,
-      illustrations: illustrations,
+      illustrations,
     }).eq("id", orderId);
 
     return new Response(JSON.stringify({ success: true, orderId, story, illustrations }), {
