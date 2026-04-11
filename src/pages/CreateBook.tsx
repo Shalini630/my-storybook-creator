@@ -40,57 +40,106 @@ const adultThemes = [
   { id: "motivation", label: "Inspirational", img: bookCover8, emoji: "🌟" },
 ];
 
+const occasions = [
+  { id: "birthday", emoji: "🎂", label: "Birthday" },
+  { id: "mothers-day", emoji: "💐", label: "Mother's Day" },
+  { id: "anniversary", emoji: "💕", label: "Anniversary" },
+  { id: "wedding", emoji: "💒", label: "Wedding" },
+  { id: "bachelorette", emoji: "💃", label: "Bachelorette" },
+  { id: "retirement", emoji: "🎉", label: "Retirement" },
+  { id: "fathers-day", emoji: "👔", label: "Father's Day" },
+  { id: "graduation", emoji: "🎓", label: "Graduation" },
+  { id: "farewell", emoji: "👋", label: "Farewell" },
+  { id: "new-baby", emoji: "👶", label: "New Baby" },
+  { id: "just-because", emoji: "😊", label: "Just Because" },
+  { id: "roast", emoji: "😂", label: "Roast" },
+];
+
 const kidAgeOptions = ["2-3", "4-5", "6-7", "8-10"];
 const genderOptions = ["Girl", "Boy", "Non-binary"];
 const toneOptions = ["Humorous", "Heartfelt", "Adventurous", "Inspirational", "Romantic", "Mysterious"];
-const relationshipOptions = ["For myself", "Partner / Spouse", "Best Friend", "Parent", "Sibling", "Colleague"];
 const bookSizeOptions = ["Standard (8×10)", "Compact (6×8)", "Large (10×12)"];
 
-const TOTAL_STEPS = 5;
+// Steps: 0=Gift?, 1=Occasion, 2=Audience, 3=Couple?, 4=PersonInfo, 5=Personality, 6=Theme, 7=Tone&Cover, 8=Finalize
+const TOTAL_STEPS = 9;
 
 const CreateBook = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [audience, setAudience] = useState<"kid" | "adult" | "">("");
   const [generating, setGenerating] = useState(false);
   const [step, setStep] = useState(0);
   const [form, setForm] = useState({
-    // Shared
+    isGift: null as boolean | null,
+    occasion: "",
+    audience: "" as "" | "kid" | "adult",
+    isCouple: null as boolean | null,
+    birthdayType: "" as "" | "human" | "pet",
+    // Person info
     name: "",
-    theme: "",
-    dedication: "",
-    bookSize: "",
-    coverType: "" as "" | "softcover" | "hardcover",
-    photo: null as File | null,
-    photoPreview: "",
-    // Kid-specific
+    partnerName: "",
     age: "",
     gender: "",
     interests: "",
     favoriteCharacter: "",
-    // Adult-specific
-    tone: "",
     relationship: "",
     hobbies: "",
     favoriteMemory: "",
     personalMessage: "",
+    // Personality questions
+    personality: "",
+    funnyQuirks: "",
+    favoriteThings: "",
+    hilariousMoment: "",
+    bestFriends: "",
+    favoriteTreats: "",
+    sleepHabits: "",
+    memorableAdventure: "",
+    // Book config
+    theme: "",
+    tone: "",
+    bookSize: "",
+    coverType: "" as "" | "softcover" | "hardcover",
+    dedication: "",
+    photo: null as File | null,
+    photoPreview: "",
   });
 
+  const audience = form.audience;
   const themes = audience === "kid" ? kidThemes : adultThemes;
 
   const canNext = (() => {
-    if (step === 0) return !!audience;
-    if (step === 1) {
+    if (step === 0) return form.isGift !== null;
+    if (step === 1) return form.isGift ? !!form.occasion : true;
+    if (step === 2) return !!audience;
+    if (step === 3) return form.isCouple !== null;
+    if (step === 4) {
       if (audience === "kid") return !!form.name && !!form.age && !!form.gender;
-      return !!form.name && !!form.relationship;
+      return !!form.name;
     }
-    if (step === 2) return !!form.theme;
-    if (step === 3) return !!form.tone || audience === "kid";
+    if (step === 5) return true; // personality is optional
+    if (step === 6) return !!form.theme;
+    if (step === 7) return !!form.coverType;
     return true;
   })();
 
-  const handleNext = () => { if (step < TOTAL_STEPS - 1) setStep(step + 1); };
-  const handleBack = () => { if (step > 0) setStep(step - 1); };
+  // Skip occasion if not a gift, skip couple if kid
+  const getNextStep = (current: number) => {
+    let next = current + 1;
+    if (next === 1 && !form.isGift) next = 2; // skip occasion
+    if (next === 3 && audience === "kid") next = 4; // skip couple for kids
+    if (next === 3 && !audience) next = 3; // stay if no audience yet
+    return Math.min(next, TOTAL_STEPS - 1);
+  };
+
+  const getPrevStep = (current: number) => {
+    let prev = current - 1;
+    if (prev === 3 && audience === "kid") prev = 2;
+    if (prev === 1 && !form.isGift) prev = 0;
+    return Math.max(prev, 0);
+  };
+
+  const handleNext = () => setStep(getNextStep(step));
+  const handleBack = () => setStep(getPrevStep(step));
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -99,32 +148,99 @@ const CreateBook = () => {
     }
   };
 
-  const stepLabels = audience === "kid"
-    ? ["Audience", "Child Info", "Theme", "Details", "Personalize"]
-    : ["Audience", "About You", "Theme", "Tone & Style", "Personalize"];
+  const showBirthdayType = form.occasion === "birthday";
 
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
       <div className="flex-1 py-10">
         <div className="container max-w-2xl">
-          {/* Progress */}
-          <div className="mb-10 flex items-center justify-center gap-2">
-            {stepLabels.map((label, i) => (
-              <div key={label} className="flex items-center gap-2">
-                <div className={`flex h-8 w-8 items-center justify-center rounded-full font-display text-sm font-bold transition-colors ${i <= step ? "bg-gradient-primary text-primary-foreground" : "bg-secondary text-muted-foreground"}`}>
-                  {i + 1}
-                </div>
-                <span className={`hidden font-body text-sm font-medium lg:inline ${i <= step ? "text-foreground" : "text-muted-foreground"}`}>{label}</span>
-                {i < TOTAL_STEPS - 1 && <div className={`h-0.5 w-6 rounded ${i < step ? "bg-primary" : "bg-border"}`} />}
-              </div>
-            ))}
+          {/* Progress bar */}
+          <div className="mb-10">
+            <div className="h-2 w-full rounded-full bg-secondary">
+              <div
+                className="h-2 rounded-full bg-gradient-primary transition-all duration-500"
+                style={{ width: `${((step + 1) / TOTAL_STEPS) * 100}%` }}
+              />
+            </div>
+            <p className="mt-2 text-center font-body text-xs text-muted-foreground">
+              Step {step + 1} of {TOTAL_STEPS}
+            </p>
           </div>
 
           <AnimatePresence mode="wait">
-            {/* Step 0: Audience */}
+            {/* Step 0: Is this a gift? */}
             {step === 0 && (
-              <motion.div key="step0" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} className="space-y-6">
+              <motion.div key="s0" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} className="space-y-6">
+                <div className="text-center">
+                  <h2 className="mb-2 font-display text-2xl font-bold text-foreground">Is this book a gift?</h2>
+                  <p className="font-body text-muted-foreground">Let us know if you're creating a special present for someone.</p>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  {[
+                    { val: true, emoji: "🎁", label: "Yes, Create a Gift" },
+                    { val: false, emoji: "📖", label: "No, It's for Me" },
+                  ].map(opt => (
+                    <button
+                      key={String(opt.val)}
+                      onClick={() => setForm({ ...form, isGift: opt.val })}
+                      className={`rounded-2xl border-2 p-6 text-center transition-all ${form.isGift === opt.val ? "border-primary bg-primary/5 shadow-book" : "border-border hover:border-primary/50"}`}
+                    >
+                      <p className="mb-2 text-4xl">{opt.emoji}</p>
+                      <p className="font-display text-lg font-bold text-foreground">{opt.label}</p>
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            )}
+
+            {/* Step 1: Occasion */}
+            {step === 1 && (
+              <motion.div key="s1" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} className="space-y-6">
+                <div className="text-center">
+                  <h2 className="mb-2 font-display text-2xl font-bold text-foreground">What's the occasion?</h2>
+                  <p className="font-body text-muted-foreground">This helps us tailor the experience for your unique gift.</p>
+                </div>
+                <div className="grid grid-cols-3 gap-3 md:grid-cols-4">
+                  {occasions.map(o => (
+                    <button
+                      key={o.id}
+                      onClick={() => setForm({ ...form, occasion: o.id, birthdayType: o.id !== "birthday" ? "" : form.birthdayType })}
+                      className={`rounded-2xl border-2 p-4 text-center transition-all ${form.occasion === o.id ? "border-primary bg-primary/5 shadow-sm" : "border-border hover:border-primary/50"}`}
+                    >
+                      <p className="mb-1 text-2xl">{o.emoji}</p>
+                      <p className="font-display text-xs font-semibold text-foreground">{o.label}</p>
+                    </button>
+                  ))}
+                </div>
+
+                {/* Birthday: Pet or Human */}
+                {showBirthdayType && (
+                  <div className="rounded-2xl border border-border bg-card p-5">
+                    <p className="mb-3 text-center font-display text-sm font-semibold text-foreground">Who's the birthday for?</p>
+                    <div className="flex justify-center gap-4">
+                      {[
+                        { id: "human" as const, emoji: "👤", label: "Human" },
+                        { id: "pet" as const, emoji: "🐾", label: "Pet" },
+                      ].map(bt => (
+                        <button
+                          key={bt.id}
+                          onClick={() => setForm({ ...form, birthdayType: bt.id })}
+                          className={`rounded-xl border-2 px-6 py-3 text-center transition-all ${form.birthdayType === bt.id ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"}`}
+                        >
+                          <p className="text-2xl">{bt.emoji}</p>
+                          <p className="font-body text-xs font-semibold">{bt.label}</p>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </motion.div>
+            )}
+
+            {/* Step 2: Audience */}
+            {step === 2 && (
+              <motion.div key="s2" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} className="space-y-6">
                 <div className="text-center">
                   <h2 className="mb-2 font-display text-2xl font-bold text-foreground">Who is this book for?</h2>
                   <p className="font-body text-muted-foreground">Choose the audience for your personalized story.</p>
@@ -136,7 +252,7 @@ const CreateBook = () => {
                   ].map(opt => (
                     <button
                       key={opt.id}
-                      onClick={() => setAudience(opt.id)}
+                      onClick={() => setForm({ ...form, audience: opt.id })}
                       className={`rounded-2xl border-2 p-6 text-center transition-all ${audience === opt.id ? "border-primary bg-primary/5 shadow-book" : "border-border hover:border-primary/50"}`}
                     >
                       <p className="mb-2 text-4xl">{opt.emoji}</p>
@@ -148,20 +264,57 @@ const CreateBook = () => {
               </motion.div>
             )}
 
-            {/* Step 1: Person Info */}
-            {step === 1 && (
-              <motion.div key="step1" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} className="space-y-6">
+            {/* Step 3: Couple? (adults only) */}
+            {step === 3 && (
+              <motion.div key="s3" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} className="space-y-6">
+                <div className="text-center">
+                  <h2 className="mb-2 font-display text-2xl font-bold text-foreground">Is this book about a couple?</h2>
+                  <p className="font-body text-muted-foreground">Create a special love story featuring both partners with a photo of the couple on the cover!</p>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  {[
+                    { val: true, emoji: "💕", label: "Yes, It's About Us" },
+                    { val: false, emoji: "👤", label: "No, Just One Person" },
+                  ].map(opt => (
+                    <button
+                      key={String(opt.val)}
+                      onClick={() => setForm({ ...form, isCouple: opt.val })}
+                      className={`rounded-2xl border-2 p-6 text-center transition-all ${form.isCouple === opt.val ? "border-primary bg-primary/5 shadow-book" : "border-border hover:border-primary/50"}`}
+                    >
+                      <p className="mb-2 text-4xl">{opt.emoji}</p>
+                      <p className="font-display text-lg font-bold text-foreground">{opt.label}</p>
+                    </button>
+                  ))}
+                </div>
+                {form.isCouple && (
+                  <p className="text-center font-body text-sm text-muted-foreground">
+                    Couple books feature both partners as main characters with questions about your relationship!
+                  </p>
+                )}
+              </motion.div>
+            )}
+
+            {/* Step 4: Person Info */}
+            {step === 4 && (
+              <motion.div key="s4" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} className="space-y-6">
                 <div className="text-center">
                   <h2 className="mb-2 font-display text-2xl font-bold text-foreground">
-                    {audience === "kid" ? "Tell Us About Your Child" : "Tell Us About the Star"}
+                    {audience === "kid" ? "Tell Us About Your Child" : form.isCouple ? "Tell Us About the Couple" : "Tell Us About the Star"}
                   </h2>
                   <p className="font-body text-muted-foreground">We'll use this to create a unique story.</p>
                 </div>
                 <div className="space-y-4 rounded-2xl border border-border bg-card p-6">
                   <div>
-                    <Label className="font-body font-semibold">{audience === "kid" ? "Child's Name" : "Name"}</Label>
-                    <Input placeholder={audience === "kid" ? "e.g. Emma" : "e.g. Sarah"} value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="mt-1.5" />
+                    <Label className="font-body font-semibold">{audience === "kid" ? "Child's Name" : form.birthdayType === "pet" ? "Pet's Name" : "Name"}</Label>
+                    <Input placeholder={audience === "kid" ? "e.g. Emma" : form.birthdayType === "pet" ? "e.g. Max" : "e.g. Sarah"} value={form.name} onChange={e => setForm({ ...form, name: e.target.value })} className="mt-1.5" />
                   </div>
+
+                  {form.isCouple && (
+                    <div>
+                      <Label className="font-body font-semibold">Partner's Name</Label>
+                      <Input placeholder="e.g. Alex" value={form.partnerName} onChange={e => setForm({ ...form, partnerName: e.target.value })} className="mt-1.5" />
+                    </div>
+                  )}
 
                   {audience === "kid" && (
                     <>
@@ -187,45 +340,29 @@ const CreateBook = () => {
                           ))}
                         </div>
                       </div>
-                      <div>
-                        <Label className="font-body font-semibold">Interests & Hobbies</Label>
-                        <Input placeholder="e.g. dinosaurs, painting, soccer" value={form.interests} onChange={e => setForm({ ...form, interests: e.target.value })} className="mt-1.5" />
-                      </div>
-                      <div>
-                        <Label className="font-body font-semibold">Favorite Character (optional)</Label>
-                        <Input placeholder="e.g. Spider-Man, Elsa, Peppa Pig" value={form.favoriteCharacter} onChange={e => setForm({ ...form, favoriteCharacter: e.target.value })} className="mt-1.5" />
-                      </div>
                     </>
                   )}
 
-                  {audience === "adult" && (
-                    <>
-                      <div>
-                        <Label className="font-body font-semibold">Who is this book for?</Label>
-                        <div className="mt-1.5 flex flex-wrap gap-2">
-                          {relationshipOptions.map(r => (
-                            <button key={r} onClick={() => setForm({ ...form, relationship: r })}
-                              className={`rounded-xl border px-4 py-2 font-body text-sm font-medium transition-colors ${form.relationship === r ? "border-primary bg-primary/10 text-primary" : "border-border bg-card text-muted-foreground hover:border-primary/50"}`}>
-                              {r}
-                            </button>
-                          ))}
-                        </div>
+                  {audience === "adult" && !form.isCouple && (
+                    <div>
+                      <Label className="font-body font-semibold">Relationship</Label>
+                      <div className="mt-1.5 flex flex-wrap gap-2">
+                        {["For myself", "Partner / Spouse", "Best Friend", "Parent", "Sibling", "Colleague"].map(r => (
+                          <button key={r} onClick={() => setForm({ ...form, relationship: r })}
+                            className={`rounded-xl border px-4 py-2 font-body text-sm font-medium transition-colors ${form.relationship === r ? "border-primary bg-primary/10 text-primary" : "border-border bg-card text-muted-foreground hover:border-primary/50"}`}>
+                            {r}
+                          </button>
+                        ))}
                       </div>
-                      <div>
-                        <Label className="font-body font-semibold">Hobbies & Passions</Label>
-                        <Input placeholder="e.g. cooking, hiking, music, reading" value={form.hobbies} onChange={e => setForm({ ...form, hobbies: e.target.value })} className="mt-1.5" />
-                      </div>
-                      <div>
-                        <Label className="font-body font-semibold">A Favorite Memory (optional)</Label>
-                        <Input placeholder="e.g. Our trip to Paris, graduation day" value={form.favoriteMemory} onChange={e => setForm({ ...form, favoriteMemory: e.target.value })} className="mt-1.5" />
-                      </div>
-                    </>
+                    </div>
                   )}
 
                   {/* Photo Upload */}
                   <div>
-                    <Label className="font-body font-semibold">Upload Photo (optional)</Label>
-                    <p className="mb-2 font-body text-xs text-muted-foreground">Solo photo, front-facing & smiling works best</p>
+                    <Label className="font-body font-semibold">Upload Photo (for the book cover)</Label>
+                    <p className="mb-2 font-body text-xs text-muted-foreground">
+                      {form.isCouple ? "A photo of the couple together works best" : "Solo photo, front-facing & smiling works best"}
+                    </p>
                     <label className="mt-1.5 flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border p-4 transition-colors hover:border-primary/50">
                       {form.photoPreview ? (
                         <img src={form.photoPreview} alt="Preview" className="h-20 w-20 rounded-lg object-cover" />
@@ -242,9 +379,70 @@ const CreateBook = () => {
               </motion.div>
             )}
 
-            {/* Step 2: Theme */}
-            {step === 2 && (
-              <motion.div key="step2" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} className="space-y-6">
+            {/* Step 5: Personality Questions */}
+            {step === 5 && (
+              <motion.div key="s5" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} className="space-y-6">
+                <div className="text-center">
+                  <h2 className="mb-2 font-display text-2xl font-bold text-foreground">
+                    Tell us more about {form.name || "them"}
+                  </h2>
+                  <p className="font-body text-muted-foreground">The more you share, the more personal the book will be!</p>
+                </div>
+                <div className="space-y-4 rounded-2xl border border-border bg-card p-6">
+                  <div>
+                    <Label className="font-body font-semibold">How would you describe {form.name || "them"}'s personality?</Label>
+                    <Input placeholder="e.g. Funny, adventurous, always smiling" value={form.personality} onChange={e => setForm({ ...form, personality: e.target.value })} className="mt-1.5" />
+                  </div>
+                  <div>
+                    <Label className="font-body font-semibold">What are {form.name || "their"}'s funniest quirks or habits?</Label>
+                    <Input placeholder="e.g. Always loses their keys, sings in the shower" value={form.funnyQuirks} onChange={e => setForm({ ...form, funnyQuirks: e.target.value })} className="mt-1.5" />
+                  </div>
+                  <div>
+                    <Label className="font-body font-semibold">What are {form.name || "their"}'s favorite things to do?</Label>
+                    <Input placeholder="e.g. Cooking pasta, hiking, binge-watching shows" value={form.favoriteThings} onChange={e => setForm({ ...form, favoriteThings: e.target.value })} className="mt-1.5" />
+                  </div>
+                  <div>
+                    <Label className="font-body font-semibold">Share a hilarious moment with {form.name || "them"}</Label>
+                    <textarea
+                      placeholder="e.g. That time they tried to cook and set off the fire alarm..."
+                      value={form.hilariousMoment}
+                      onChange={e => setForm({ ...form, hilariousMoment: e.target.value })}
+                      rows={2}
+                      className="mt-1.5 w-full rounded-lg border border-input bg-background px-3 py-2 font-body text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  </div>
+
+                  {form.birthdayType === "pet" ? (
+                    <>
+                      <div>
+                        <Label className="font-body font-semibold">What are {form.name || "their"}'s favorite treats or foods?</Label>
+                        <Input placeholder="e.g. Peanut butter, chicken treats" value={form.favoriteTreats} onChange={e => setForm({ ...form, favoriteTreats: e.target.value })} className="mt-1.5" />
+                      </div>
+                      <div>
+                        <Label className="font-body font-semibold">Where and how does {form.name || "they"} like to sleep?</Label>
+                        <Input placeholder="e.g. On the couch, curled up in a ball" value={form.sleepHabits} onChange={e => setForm({ ...form, sleepHabits: e.target.value })} className="mt-1.5" />
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div>
+                        <Label className="font-body font-semibold">Who are {form.name || "their"}'s best friends?</Label>
+                        <Input placeholder="e.g. Jake, Sarah, and their dog Bruno" value={form.bestFriends} onChange={e => setForm({ ...form, bestFriends: e.target.value })} className="mt-1.5" />
+                      </div>
+                    </>
+                  )}
+
+                  <div>
+                    <Label className="font-body font-semibold">What's {form.name || "their"}'s most memorable adventure or trip?</Label>
+                    <Input placeholder="e.g. Road trip to Goa, camping in the mountains" value={form.memorableAdventure} onChange={e => setForm({ ...form, memorableAdventure: e.target.value })} className="mt-1.5" />
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {/* Step 6: Theme */}
+            {step === 6 && (
+              <motion.div key="s6" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} className="space-y-6">
                 <div className="text-center">
                   <h2 className="mb-2 font-display text-2xl font-bold text-foreground">Choose a Theme</h2>
                   <p className="font-body text-muted-foreground">
@@ -265,13 +463,11 @@ const CreateBook = () => {
               </motion.div>
             )}
 
-            {/* Step 3: Tone & Details */}
-            {step === 3 && (
-              <motion.div key="step3" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} className="space-y-6">
+            {/* Step 7: Tone & Cover */}
+            {step === 7 && (
+              <motion.div key="s7" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} className="space-y-6">
                 <div className="text-center">
-                  <h2 className="mb-2 font-display text-2xl font-bold text-foreground">
-                    {audience === "kid" ? "Story Details" : "Tone & Style"}
-                  </h2>
+                  <h2 className="mb-2 font-display text-2xl font-bold text-foreground">Tone & Book Style</h2>
                   <p className="font-body text-muted-foreground">Help us craft the perfect story.</p>
                 </div>
                 <div className="space-y-4 rounded-2xl border border-border bg-card p-6">
@@ -315,26 +511,13 @@ const CreateBook = () => {
                       ))}
                     </div>
                   </div>
-
-                  {audience === "adult" && (
-                    <div>
-                      <Label className="font-body font-semibold">Personal Message in the Story (optional)</Label>
-                      <textarea
-                        placeholder="Any inside jokes, shared memories, or special moments you'd like woven into the story..."
-                        value={form.personalMessage}
-                        onChange={e => setForm({ ...form, personalMessage: e.target.value })}
-                        rows={3}
-                        className="mt-1.5 w-full rounded-lg border border-input bg-background px-3 py-2 font-body text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                      />
-                    </div>
-                  )}
                 </div>
               </motion.div>
             )}
 
-            {/* Step 4: Personalize / Summary */}
-            {step === 4 && (
-              <motion.div key="step4" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} className="space-y-6">
+            {/* Step 8: Finalize */}
+            {step === 8 && (
+              <motion.div key="s8" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} className="space-y-6">
                 <div className="text-center">
                   <h2 className="mb-2 font-display text-2xl font-bold text-foreground">Final Touches</h2>
                   <p className="font-body text-muted-foreground">Add a personal dedication for {form.name || "your story"}.</p>
@@ -354,16 +537,13 @@ const CreateBook = () => {
                   <div className="rounded-xl bg-secondary/50 p-4">
                     <h4 className="mb-2 font-display text-sm font-semibold text-foreground">Book Summary</h4>
                     <ul className="space-y-1 font-body text-sm text-muted-foreground">
-                      <li>👤 For: <span className="font-semibold text-foreground">{audience === "kid" ? "Kids" : "Adults"}</span></li>
-                      <li>📝 Starring: <span className="font-semibold text-foreground">{form.name}</span></li>
+                      {form.isGift && <li>🎁 Gift for: <span className="font-semibold text-foreground">{occasions.find(o => o.id === form.occasion)?.label || "Someone special"}</span></li>}
+                      <li>👤 For: <span className="font-semibold text-foreground">{audience === "kid" ? "Kids" : "Adults"}{form.isCouple ? " (Couple)" : ""}</span></li>
+                      <li>📝 Starring: <span className="font-semibold text-foreground">{form.name}{form.partnerName ? ` & ${form.partnerName}` : ""}</span></li>
                       {audience === "kid" && form.age && <li>🎂 Age: <span className="font-semibold text-foreground">{form.age} years</span></li>}
-                      {audience === "kid" && form.gender && <li>⚧ Gender: <span className="font-semibold text-foreground">{form.gender}</span></li>}
-                      {audience === "adult" && form.relationship && <li>💝 Relationship: <span className="font-semibold text-foreground">{form.relationship}</span></li>}
                       <li>🎨 Theme: <span className="font-semibold text-foreground">{themes.find(t => t.id === form.theme)?.label}</span></li>
                       {form.tone && <li>🎭 Tone: <span className="font-semibold text-foreground">{form.tone}</span></li>}
-                      {form.bookSize && <li>📐 Size: <span className="font-semibold text-foreground">{form.bookSize}</span></li>}
                       {form.coverType && <li>📕 Cover: <span className="font-semibold text-foreground">{form.coverType === "softcover" ? "Softcover — ₹999" : "Hardcover — ₹1,299"}</span></li>}
-                      {(form.interests || form.hobbies) && <li>⭐ Interests: <span className="font-semibold text-foreground">{form.interests || form.hobbies}</span></li>}
                       {form.photo && <li>📷 Photo: <span className="font-semibold text-foreground">Uploaded ✓</span></li>}
                     </ul>
                   </div>
@@ -396,25 +576,37 @@ const CreateBook = () => {
 
                     const price = form.coverType === "hardcover" ? 1299 : 999;
 
+                    // Build personality string for the AI
+                    const personalityDetails = [
+                      form.personality && `Personality: ${form.personality}`,
+                      form.funnyQuirks && `Quirks: ${form.funnyQuirks}`,
+                      form.favoriteThings && `Favorite things: ${form.favoriteThings}`,
+                      form.hilariousMoment && `Funny moment: ${form.hilariousMoment}`,
+                      form.bestFriends && `Best friends: ${form.bestFriends}`,
+                      form.favoriteTreats && `Favorite treats: ${form.favoriteTreats}`,
+                      form.sleepHabits && `Sleep habits: ${form.sleepHabits}`,
+                      form.memorableAdventure && `Memorable adventure: ${form.memorableAdventure}`,
+                    ].filter(Boolean).join(". ");
+
                     const { data: order, error: insertError } = await supabase
                       .from("orders")
                       .insert({
                         user_id: user.id,
                         audience: audience as string,
-                        name: form.name,
+                        name: form.isCouple && form.partnerName ? `${form.name} & ${form.partnerName}` : form.name,
                         theme: form.theme,
                         tone: form.tone || null,
                         book_size: form.bookSize || null,
                         cover_type: form.coverType,
                         dedication: form.dedication || null,
-                        personal_message: form.personalMessage || null,
+                        personal_message: personalityDetails || form.personalMessage || null,
                         age: form.age || null,
                         gender: form.gender || null,
-                        interests: form.interests || null,
+                        interests: form.favoriteThings || form.interests || null,
                         favorite_character: form.favoriteCharacter || null,
                         relationship: form.relationship || null,
                         hobbies: form.hobbies || null,
-                        favorite_memory: form.favoriteMemory || null,
+                        favorite_memory: form.memorableAdventure || form.favoriteMemory || null,
                         price,
                         status: "pending",
                       })
@@ -425,10 +617,8 @@ const CreateBook = () => {
                       throw new Error(insertError?.message || "Failed to create order");
                     }
 
-                    // Navigate to preview immediately (it will show loading state)
                     navigate(`/preview/${order.id}`);
 
-                    // Trigger generation in background
                     supabase.functions.invoke("generate-book", {
                       body: { orderId: order.id },
                     });
