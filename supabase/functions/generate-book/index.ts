@@ -23,11 +23,13 @@ Deno.serve(async (req) => {
       });
     }
 
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_PUBLISHABLE_KEY")!,
-      { global: { headers: { Authorization: authHeader } } }
-    );
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+    const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
+    const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
 
     const { data: { user }, error: authError } = await supabase.auth.getUser();
     if (authError || !user) {
@@ -45,10 +47,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    const adminClient = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
-    );
+    const adminClient = createClient(supabaseUrl, serviceRoleKey);
 
     const { data: order, error: orderError } = await adminClient
       .from("orders")
@@ -58,6 +57,7 @@ Deno.serve(async (req) => {
       .single();
 
     if (orderError || !order) {
+      console.error("Order fetch error:", orderError);
       return new Response(JSON.stringify({ error: "Order not found" }), {
         status: 404,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -72,6 +72,7 @@ Deno.serve(async (req) => {
 Theme: ${order.theme}. Tone: ${order.tone || "Adventurous"}.
 ${order.interests ? `Loves: ${order.interests}` : ""}
 ${order.favorite_character ? `Favorite character: ${order.favorite_character}` : ""}
+${order.personal_message ? `Details: ${order.personal_message}` : ""}
 ${order.dedication ? `Dedication: ${order.dedication}` : ""}
 Create exactly 4 pages. Each page: pageNumber, short paragraph (3-5 sentences, age-appropriate), vivid illustration description.
 Return JSON: {"title":"string","pages":[{"pageNumber":1,"text":"string","illustrationPrompt":"string"}]}`
@@ -79,10 +80,12 @@ Return JSON: {"title":"string","pages":[{"pageNumber":1,"text":"string","illustr
 Genre: ${order.theme}. Tone: ${order.tone || "Heartfelt"}. Relationship: ${order.relationship || "For myself"}.
 ${order.hobbies ? `Hobbies: ${order.hobbies}` : ""}
 ${order.favorite_memory ? `Memory: ${order.favorite_memory}` : ""}
-${order.personal_message ? `Personal: ${order.personal_message}` : ""}
+${order.personal_message ? `Details: ${order.personal_message}` : ""}
 ${order.dedication ? `Dedication: ${order.dedication}` : ""}
 Create exactly 4 pages. Each page: pageNumber, engaging paragraph (4-6 sentences), vivid illustration description.
 Return JSON: {"title":"string","pages":[{"pageNumber":1,"text":"string","illustrationPrompt":"string"}]}`;
+
+    console.log("Generating story for order:", orderId);
 
     // Generate story
     const storyResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
@@ -92,7 +95,7 @@ Return JSON: {"title":"string","pages":[{"pageNumber":1,"text":"string","illustr
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: "You are a creative book author. Always respond with valid JSON only, no markdown." },
           { role: "user", content: storyPrompt },
@@ -138,12 +141,13 @@ Return JSON: {"title":"string","pages":[{"pageNumber":1,"text":"string","illustr
     }
 
     const storyData = await storyResponse.json();
+    console.log("Story response received");
     const toolCall = storyData.choices?.[0]?.message?.tool_calls?.[0];
     let story;
     try {
       story = JSON.parse(toolCall.function.arguments);
     } catch {
-      console.error("Failed to parse story JSON:", toolCall);
+      console.error("Failed to parse story JSON:", JSON.stringify(toolCall));
       await adminClient.from("orders").update({ status: "failed" }).eq("id", orderId);
       return new Response(JSON.stringify({ error: "Failed to parse story" }), {
         status: 500,
@@ -151,7 +155,9 @@ Return JSON: {"title":"string","pages":[{"pageNumber":1,"text":"string","illustr
       });
     }
 
-    // Generate ALL illustrations in PARALLEL for speed
+    console.log("Story generated, creating illustrations in parallel...");
+
+    // Generate ALL illustrations in PARALLEL
     const illustrationPromises = story.pages.map((page: any) =>
       fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
         method: "POST",
@@ -173,9 +179,12 @@ Return JSON: {"title":"string","pages":[{"pageNumber":1,"text":"string","illustr
         .then(async (res) => {
           if (res.ok) {
             const data = await res.json();
-            return data.choices?.[0]?.message?.images?.[0]?.image_url?.url || "";
+            const url = data.choices?.[0]?.message?.images?.[0]?.image_url?.url || "";
+            console.log(`Image for page ${page.pageNumber}: ${url ? "success" : "empty"}`);
+            return url;
           }
-          console.error("Image gen failed for page", page.pageNumber, res.status);
+          const errText = await res.text();
+          console.error("Image gen failed for page", page.pageNumber, res.status, errText);
           return "";
         })
         .catch((err) => {
@@ -192,7 +201,9 @@ Return JSON: {"title":"string","pages":[{"pageNumber":1,"text":"string","illustr
       illustrations,
     }).eq("id", orderId);
 
-    return new Response(JSON.stringify({ success: true, orderId, story, illustrations }), {
+    console.log("Book generation complete for order:", orderId);
+
+    return new Response(JSON.stringify({ success: true, orderId }), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
