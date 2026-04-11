@@ -19,43 +19,40 @@ const HeroSection = () => {
           transition={{ duration: 0.7 }}
         >
           <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-primary/10 px-4 py-1.5">
-            <Sparkles className="h-4 w-4 text-primary" />
-            <span className="font-body text-sm font-semibold text-primary">2,000+ books created</span>
+            <span className="h-2 w-2 rounded-full bg-primary" />
+            <span className="font-body text-sm font-semibold text-primary">8,000+ personalized books created</span>
           </div>
 
           <h1 className="mb-6 font-display text-4xl font-bold leading-tight text-foreground md:text-5xl lg:text-6xl">
-            Make your child the{" "}
-            <span className="text-gradient-warm">hero</span>{" "}
-            of their own story
+            Make them the{" "}
+            <span className="text-gradient-warm">star</span>{" "}
+            of a personalized book
           </h1>
 
-          <p className="mb-4 max-w-lg font-body text-lg text-muted-foreground">
-            Answer a few fun questions, and we'll create a beautifully illustrated, fully personalized storybook starring your child. Delivered to your door.
+          <p className="mb-6 max-w-lg font-body text-lg text-muted-foreground">
+            Answer a few questions, preview their story, and get a one-of-a-kind gift book delivered to your doorstep.
           </p>
 
-          <div className="mb-6 flex items-center gap-4">
-            <div className="rounded-xl border border-border bg-card px-4 py-2 text-center">
-              <p className="font-body text-xs text-muted-foreground">Softcover</p>
-              <p className="font-display text-xl font-bold text-foreground">₹999</p>
-            </div>
-            <div className="rounded-xl border-2 border-primary bg-primary/5 px-4 py-2 text-center">
-              <p className="font-body text-xs text-primary font-semibold">Hardcover</p>
-              <p className="font-display text-xl font-bold text-foreground">₹1,299</p>
-            </div>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-4">
+          <div className="mb-4 flex flex-wrap items-center gap-4">
             <Button asChild size="lg" className="bg-gradient-primary px-8 font-body text-lg font-bold text-primary-foreground shadow-book hover:opacity-90">
-              <Link to="/create">Create Your Book ✨</Link>
+              <Link to="/create">Create Your Book</Link>
             </Button>
             <div className="flex items-center gap-1">
               {[...Array(5)].map((_, i) => (
                 <Star key={i} className="h-4 w-4 fill-sunshine text-sunshine" />
               ))}
               <span className="ml-2 font-body text-sm font-semibold text-foreground">4.9/5</span>
-              <span className="font-body text-sm text-muted-foreground">· by happy parents</span>
+              <span className="font-body text-sm text-muted-foreground">· by happy gifters</span>
             </div>
           </div>
+
+          <Link
+            to="/create"
+            className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/5 px-5 py-2 font-body text-sm font-semibold text-primary transition-colors hover:bg-primary/10"
+          >
+            <Sparkles className="h-4 w-4" />
+            Introducing Children's Books →
+          </Link>
         </motion.div>
 
         <motion.div
@@ -67,7 +64,7 @@ const HeroSection = () => {
           <div className="relative">
             <img
               src={heroChild}
-              alt="Happy child reading their personalized storybook"
+              alt="Happy person holding their personalized storybook"
               width={800}
               height={960}
               className="w-full max-w-md rounded-3xl shadow-book"
