@@ -149,6 +149,86 @@ const CreateBook = () => {
 
   const showBirthdayType = form.occasion === "birthday";
 
+  const handleChildComplete = async (childData: ChildFormData) => {
+    setGenerating(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        toast({ title: "Please sign in first", description: "You need an account to generate a book.", variant: "destructive" });
+        navigate("/auth");
+        return;
+      }
+
+      const price = childData.coverType === "hardcover" ? 1299 : 999;
+
+      const personalityDetails = [
+        `Occasion: ${childData.occasion}`,
+        `Personality: ${childData.personality.join(", ")}`,
+        childData.favoriteToy && `Favorite toy: ${childData.favoriteToy}`,
+        childData.favoriteFood && `Favorite food: ${childData.favoriteFood}`,
+        childData.favoriteActivity && `Favorite activity: ${childData.favoriteActivity}`,
+        childData.favoriteCharacter && `Favorite character: ${childData.favoriteCharacter}`,
+        childData.dislikes.length > 0 && `Dislikes: ${childData.dislikes.join(", ")}${childData.dislikesCustom ? ", " + childData.dislikesCustom : ""}`,
+        childData.sidekick && `Sidekick: ${childData.sidekick}`,
+        childData.goal && `Story goal: ${childData.goal}`,
+        childData.challenge && `Story challenge: ${childData.challenge}`,
+        childData.cuteHabit && `Cute habit: ${childData.cuteHabit}`,
+        childData.funnyPhrase && `Funny phrase: ${childData.funnyPhrase}`,
+        childData.smileMemory && `Smile memory: ${childData.smileMemory}`,
+        childData.whySpecial && `Why special: ${childData.whySpecial}`,
+        childData.messageForChild && `Message: ${childData.messageForChild}`,
+        childData.futureWish && `Future wish: ${childData.futureWish}`,
+        childData.songName && `Song: ${childData.songName}`,
+        childData.songWhy && `Song meaning: ${childData.songWhy}`,
+      ].filter(Boolean).join(". ");
+
+      const { data: order, error: insertError } = await supabase
+        .from("orders")
+        .insert({
+          user_id: user.id,
+          audience: "kid",
+          name: childData.nickname ? `${childData.name} (${childData.nickname})` : childData.name,
+          theme: childData.theme,
+          cover_type: childData.coverType,
+          dedication: childData.dedication || null,
+          personal_message: personalityDetails,
+          age: childData.age,
+          favorite_character: childData.favoriteCharacter || null,
+          favorite_memory: childData.smileMemory || null,
+          interests: childData.favoriteActivity || null,
+          hobbies: childData.favoriteToy || null,
+          price,
+          status: "pending",
+        })
+        .select()
+        .single();
+
+      if (insertError || !order) throw new Error(insertError?.message || "Failed to create order");
+
+      navigate(`/preview/${order.id}`);
+      supabase.functions.invoke("generate-book", { body: { orderId: order.id } });
+    } catch (err: any) {
+      console.error(err);
+      toast({ title: "Error", description: err.message || "Something went wrong", variant: "destructive" });
+      setGenerating(false);
+    }
+  };
+
+  // If audience is kid and we're past step 0, render the child flow
+  if (audience === "kid" && step > 0) {
+    return (
+      <div className="flex min-h-screen flex-col">
+        <Navbar />
+        <div className="flex-1 py-10">
+          <div className="container max-w-2xl">
+            <ChildStoryFlow onComplete={handleChildComplete} generating={generating} />
+          </div>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
