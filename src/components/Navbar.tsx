@@ -27,20 +27,21 @@ const Navbar = () => {
           <Link to="/create" className="font-body text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
             Create a Book
           </Link>
-          {user && (
-            <Link to="/my-books" className="font-body text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
-              My Books
-            </Link>
-          )}
-            <div className="flex items-center gap-3">
-              <span className="flex items-center gap-1.5 font-body text-sm text-muted-foreground">
-                <User className="h-4 w-4" />
-                {user.user_metadata?.full_name || user.email?.split("@")[0]}
-              </span>
-              <Button variant="outline" size="sm" onClick={signOut} className="gap-1.5 font-body text-sm">
-                <LogOut className="h-3.5 w-3.5" /> Sign Out
-              </Button>
-            </div>
+          {user ? (
+            <>
+              <Link to="/my-books" className="font-body text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+                My Books
+              </Link>
+              <div className="flex items-center gap-3">
+                <span className="flex items-center gap-1.5 font-body text-sm text-muted-foreground">
+                  <User className="h-4 w-4" />
+                  {user.user_metadata?.full_name || user.email?.split("@")[0]}
+                </span>
+                <Button variant="outline" size="sm" onClick={signOut} className="gap-1.5 font-body text-sm">
+                  <LogOut className="h-3.5 w-3.5" /> Sign Out
+                </Button>
+              </div>
+            </>
           ) : (
             <div className="flex items-center gap-2">
               <Button asChild variant="ghost" size="sm" className="font-body text-sm">
