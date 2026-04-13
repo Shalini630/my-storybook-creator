@@ -398,7 +398,7 @@ const ChildStoryFlow = ({ onComplete, generating }: ChildStoryFlowProps) => {
               </div>
               <div>
                 <Label className="font-body font-semibold">A funny thing {n} always says</Label>
-                <Input placeholder='e.g. "I'm not tired!", "One more story please!"' value={form.funnyPhrase} onChange={e => setForm({ ...form, funnyPhrase: e.target.value })} className="mt-1.5" />
+                <Input placeholder={"e.g. \"I'm not tired!\", \"One more story please!\""} value={form.funnyPhrase} onChange={e => setForm({ ...form, funnyPhrase: e.target.value })} className="mt-1.5" />
               </div>
               <div>
                 <Label className="font-body font-semibold">A moment that made you smile</Label>
