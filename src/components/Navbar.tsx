@@ -27,7 +27,11 @@ const Navbar = () => {
           <Link to="/create" className="font-body text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
             Create a Book
           </Link>
-          {user ? (
+          {user && (
+            <Link to="/my-books" className="font-body text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+              My Books
+            </Link>
+          )}
             <div className="flex items-center gap-3">
               <span className="flex items-center gap-1.5 font-body text-sm text-muted-foreground">
                 <User className="h-4 w-4" />
