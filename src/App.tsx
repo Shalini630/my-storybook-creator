@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { AuthProvider } from "@/contexts/AuthContext";
 import Index from "./pages/Index.tsx";
 import CreateBook from "./pages/CreateBook.tsx";
+import MyBooks from "./pages/MyBooks.tsx";
 import Privacy from "./pages/Privacy.tsx";
 import Terms from "./pages/Terms.tsx";
 import Contact from "./pages/Contact.tsx";
