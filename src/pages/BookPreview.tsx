@@ -214,8 +214,8 @@ const BookPreview = () => {
       <div className="flex min-h-screen flex-col">
         <Navbar />
         <div className="flex flex-1 flex-col items-center justify-center gap-6 p-8">
-          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-100">
-            <Check className="h-10 w-10 text-green-600" />
+          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
+            <Check className="h-10 w-10 text-primary" />
           </div>
           <h2 className="font-display text-2xl font-bold text-foreground">Order Confirmed! 🎉</h2>
           <p className="max-w-md text-center font-body text-muted-foreground">
