@@ -380,64 +380,25 @@ const CreateBook = () => {
               </motion.div>
             )}
 
-            {/* Step 5: Personality Questions */}
+            {/* Step 5: Occasion-Specific Questions */}
             {step === 5 && (
-              <motion.div key="s5" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }} className="space-y-6">
-                <div className="text-center">
-                  <h2 className="mb-2 font-display text-2xl font-bold text-foreground">
-                    Tell us more about {form.name || "them"}
-                  </h2>
-                  <p className="font-body text-muted-foreground">The more you share, the more personal the book will be!</p>
-                </div>
-                <div className="space-y-4 rounded-2xl border border-border bg-card p-6">
-                  <div>
-                    <Label className="font-body font-semibold">How would you describe {form.name || "them"}'s personality?</Label>
-                    <Input placeholder="e.g. Funny, adventurous, always smiling" value={form.personality} onChange={e => setForm({ ...form, personality: e.target.value })} className="mt-1.5" />
-                  </div>
-                  <div>
-                    <Label className="font-body font-semibold">What are {form.name || "their"}'s funniest quirks or habits?</Label>
-                    <Input placeholder="e.g. Always loses their keys, sings in the shower" value={form.funnyQuirks} onChange={e => setForm({ ...form, funnyQuirks: e.target.value })} className="mt-1.5" />
-                  </div>
-                  <div>
-                    <Label className="font-body font-semibold">What are {form.name || "their"}'s favorite things to do?</Label>
-                    <Input placeholder="e.g. Cooking pasta, hiking, binge-watching shows" value={form.favoriteThings} onChange={e => setForm({ ...form, favoriteThings: e.target.value })} className="mt-1.5" />
-                  </div>
-                  <div>
-                    <Label className="font-body font-semibold">Share a hilarious moment with {form.name || "them"}</Label>
-                    <textarea
-                      placeholder="e.g. That time they tried to cook and set off the fire alarm..."
-                      value={form.hilariousMoment}
-                      onChange={e => setForm({ ...form, hilariousMoment: e.target.value })}
-                      rows={2}
-                      className="mt-1.5 w-full rounded-lg border border-input bg-background px-3 py-2 font-body text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-                    />
-                  </div>
-
-                  {form.birthdayType === "pet" ? (
-                    <>
-                      <div>
-                        <Label className="font-body font-semibold">What are {form.name || "their"}'s favorite treats or foods?</Label>
-                        <Input placeholder="e.g. Peanut butter, chicken treats" value={form.favoriteTreats} onChange={e => setForm({ ...form, favoriteTreats: e.target.value })} className="mt-1.5" />
-                      </div>
-                      <div>
-                        <Label className="font-body font-semibold">Where and how does {form.name || "they"} like to sleep?</Label>
-                        <Input placeholder="e.g. On the couch, curled up in a ball" value={form.sleepHabits} onChange={e => setForm({ ...form, sleepHabits: e.target.value })} className="mt-1.5" />
-                      </div>
-                    </>
-                  ) : (
-                    <>
-                      <div>
-                        <Label className="font-body font-semibold">Who are {form.name || "their"}'s best friends?</Label>
-                        <Input placeholder="e.g. Jake, Sarah, and their dog Bruno" value={form.bestFriends} onChange={e => setForm({ ...form, bestFriends: e.target.value })} className="mt-1.5" />
-                      </div>
-                    </>
-                  )}
-
-                  <div>
-                    <Label className="font-body font-semibold">What's {form.name || "their"}'s most memorable adventure or trip?</Label>
-                    <Input placeholder="e.g. Road trip to Goa, camping in the mountains" value={form.memorableAdventure} onChange={e => setForm({ ...form, memorableAdventure: e.target.value })} className="mt-1.5" />
-                  </div>
-                </div>
+              <motion.div key="s5" initial={{ opacity: 0, x: 30 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -30 }}>
+                <OccasionQuestions
+                  occasion={form.occasion || (form.isGift ? "" : "just-because")}
+                  birthdayType={form.birthdayType}
+                  name={form.name}
+                  form={{
+                    personality: form.personality,
+                    funnyQuirks: form.funnyQuirks,
+                    favoriteThings: form.favoriteThings,
+                    hilariousMoment: form.hilariousMoment,
+                    bestFriends: form.bestFriends,
+                    favoriteTreats: form.favoriteTreats,
+                    sleepHabits: form.sleepHabits,
+                    memorableAdventure: form.memorableAdventure,
+                  }}
+                  onUpdate={(field, value) => setForm({ ...form, [field]: value })}
+                />
               </motion.div>
             )}
 
