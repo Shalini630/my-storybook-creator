@@ -4,8 +4,15 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ArrowLeft, ArrowRight, Check, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+
+declare global {
+  interface Window {
+    Razorpay: any;
+  }
+}
 
 interface StoryPage {
   pageNumber: number;
@@ -21,10 +28,21 @@ interface StoryContent {
 const BookPreview = () => {
   const { orderId } = useParams();
   const navigate = useNavigate();
+  const { toast } = useToast();
   const [order, setOrder] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(0);
   const [error, setError] = useState("");
+  const [paying, setPaying] = useState(false);
+
+  // Load Razorpay script
+  useEffect(() => {
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.async = true;
+    document.body.appendChild(script);
+    return () => { document.body.removeChild(script); };
+  }, []);
 
   useEffect(() => {
     if (!orderId) return;
@@ -45,7 +63,6 @@ const BookPreview = () => {
       setOrder(data);
       setLoading(false);
 
-      // If still generating, poll every 5s
       if (data.status === "generating" || data.status === "pending") {
         const interval = setInterval(async () => {
           const { data: updated } = await supabase
@@ -56,11 +73,11 @@ const BookPreview = () => {
 
           if (updated) {
             setOrder(updated);
-            if (updated.status === "preview" || updated.status === "failed") {
+            if (updated.status !== "generating" && updated.status !== "pending") {
               clearInterval(interval);
             }
           }
-        }, 5000);
+        }, 3000);
 
         return () => clearInterval(interval);
       }
@@ -68,6 +85,62 @@ const BookPreview = () => {
 
     fetchOrder();
   }, [orderId]);
+
+  const handlePayment = async () => {
+    if (!orderId || paying) return;
+    setPaying(true);
+
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke("create-razorpay-order", {
+        body: { orderId },
+      });
+
+      if (fnError || !data) throw new Error(fnError?.message || "Failed to create payment order");
+
+      const options = {
+        key: data.keyId,
+        amount: data.amount,
+        currency: data.currency,
+        name: "Kahaani Se Kitab",
+        description: `Personalized Book for ${order?.name}`,
+        order_id: data.razorpayOrderId,
+        handler: async (response: any) => {
+          try {
+            const { error: verifyError } = await supabase.functions.invoke("verify-payment", {
+              body: {
+                razorpay_order_id: response.razorpay_order_id,
+                razorpay_payment_id: response.razorpay_payment_id,
+                razorpay_signature: response.razorpay_signature,
+                orderId,
+              },
+            });
+
+            if (verifyError) throw verifyError;
+
+            toast({ title: "Payment Successful! 🎉", description: "Your book order has been confirmed." });
+            setOrder((prev: any) => ({ ...prev, status: "paid" }));
+          } catch (err: any) {
+            toast({ title: "Payment verification failed", description: err.message, variant: "destructive" });
+          }
+        },
+        prefill: { name: order?.name || "" },
+        theme: { color: "#F97316" },
+        modal: {
+          ondismiss: () => setPaying(false),
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.on("payment.failed", (response: any) => {
+        toast({ title: "Payment Failed", description: response.error.description, variant: "destructive" });
+        setPaying(false);
+      });
+      rzp.open();
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+      setPaying(false);
+    }
+  };
 
   const story = order?.story_content as StoryContent | null;
   const illustrations = (order?.illustrations as string[]) || [];
@@ -136,6 +209,26 @@ const BookPreview = () => {
     );
   }
 
+  if (order?.status === "paid") {
+    return (
+      <div className="flex min-h-screen flex-col">
+        <Navbar />
+        <div className="flex flex-1 flex-col items-center justify-center gap-6 p-8">
+          <div className="flex h-20 w-20 items-center justify-center rounded-full bg-green-100">
+            <Check className="h-10 w-10 text-green-600" />
+          </div>
+          <h2 className="font-display text-2xl font-bold text-foreground">Order Confirmed! 🎉</h2>
+          <p className="max-w-md text-center font-body text-muted-foreground">
+            Your personalized book for <span className="font-semibold text-foreground">{order.name}</span> has been ordered.
+            We'll start printing and ship it to you soon!
+          </p>
+          <Button onClick={() => navigate("/create")} className="font-body">Create Another Book</Button>
+        </div>
+        <Footer />
+      </div>
+    );
+  }
+
   if (!story) {
     return (
       <div className="flex min-h-screen flex-col">
@@ -162,7 +255,6 @@ const BookPreview = () => {
             </p>
           </div>
 
-          {/* Book Preview */}
           <div className="relative mx-auto max-w-lg">
             <AnimatePresence mode="wait">
               <motion.div
@@ -173,21 +265,18 @@ const BookPreview = () => {
                 transition={{ duration: 0.4 }}
                 className="overflow-hidden rounded-2xl border border-border bg-card shadow-book"
               >
-                {/* Illustration */}
-                {illustrations[currentPage] && (
+                {illustrations[currentPage] ? (
                   <img
                     src={illustrations[currentPage]}
                     alt={`Page ${currentPage + 1} illustration`}
                     className="aspect-[4/3] w-full object-cover"
                   />
-                )}
-                {!illustrations[currentPage] && (
+                ) : (
                   <div className="flex aspect-[4/3] w-full items-center justify-center bg-secondary">
                     <p className="font-body text-sm text-muted-foreground">Illustration unavailable</p>
                   </div>
                 )}
 
-                {/* Text */}
                 <div className="p-6">
                   <p className="font-body text-base leading-relaxed text-foreground">
                     {story.pages[currentPage].text}
@@ -199,7 +288,6 @@ const BookPreview = () => {
               </motion.div>
             </AnimatePresence>
 
-            {/* Page Navigation */}
             <div className="mt-6 flex items-center justify-between">
               <Button
                 variant="outline"
@@ -229,7 +317,7 @@ const BookPreview = () => {
             </div>
           </div>
 
-          {/* Finalize Section */}
+          {/* Payment Section */}
           <div className="mt-10 rounded-2xl border border-border bg-card p-6 text-center">
             <h3 className="mb-2 font-display text-xl font-bold text-foreground">Love Your Book?</h3>
             <p className="mb-4 font-body text-muted-foreground">
@@ -239,13 +327,15 @@ const BookPreview = () => {
               <Button variant="outline" onClick={() => navigate("/create")} className="font-body">
                 Start Over
               </Button>
-              <Button className="gap-2 bg-gradient-primary font-body font-bold text-primary-foreground shadow-book hover:opacity-90">
-                <Check className="h-4 w-4" /> Confirm & Pay
+              <Button
+                onClick={handlePayment}
+                disabled={paying}
+                className="gap-2 bg-gradient-primary font-body font-bold text-primary-foreground shadow-book hover:opacity-90"
+              >
+                {paying ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+                {paying ? "Processing..." : "Confirm & Pay"}
               </Button>
             </div>
-            <p className="mt-3 font-body text-xs text-muted-foreground">
-              Payment integration coming soon. Your book has been saved.
-            </p>
           </div>
         </div>
       </div>
