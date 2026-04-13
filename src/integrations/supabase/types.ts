@@ -78,6 +78,12 @@ export type Database = {
           price: number
           razorpay_order_id: string | null
           relationship: string | null
+          shipping_address: string | null
+          shipping_city: string | null
+          shipping_name: string | null
+          shipping_phone: string | null
+          shipping_pincode: string | null
+          shipping_state: string | null
           status: string
           story_content: Json | null
           theme: string
@@ -107,6 +113,12 @@ export type Database = {
           price: number
           razorpay_order_id?: string | null
           relationship?: string | null
+          shipping_address?: string | null
+          shipping_city?: string | null
+          shipping_name?: string | null
+          shipping_phone?: string | null
+          shipping_pincode?: string | null
+          shipping_state?: string | null
           status?: string
           story_content?: Json | null
           theme: string
@@ -136,6 +148,12 @@ export type Database = {
           price?: number
           razorpay_order_id?: string | null
           relationship?: string | null
+          shipping_address?: string | null
+          shipping_city?: string | null
+          shipping_name?: string | null
+          shipping_phone?: string | null
+          shipping_pincode?: string | null
+          shipping_state?: string | null
           status?: string
           story_content?: Json | null
           theme?: string
