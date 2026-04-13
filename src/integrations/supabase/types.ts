@@ -30,9 +30,12 @@ export type Database = {
           illustrations: Json | null
           interests: string | null
           name: string
+          paid_at: string | null
+          payment_id: string | null
           personal_message: string | null
           photo_url: string | null
           price: number
+          razorpay_order_id: string | null
           relationship: string | null
           status: string
           story_content: Json | null
@@ -56,9 +59,12 @@ export type Database = {
           illustrations?: Json | null
           interests?: string | null
           name: string
+          paid_at?: string | null
+          payment_id?: string | null
           personal_message?: string | null
           photo_url?: string | null
           price: number
+          razorpay_order_id?: string | null
           relationship?: string | null
           status?: string
           story_content?: Json | null
@@ -82,9 +88,12 @@ export type Database = {
           illustrations?: Json | null
           interests?: string | null
           name?: string
+          paid_at?: string | null
+          payment_id?: string | null
           personal_message?: string | null
           photo_url?: string | null
           price?: number
+          razorpay_order_id?: string | null
           relationship?: string | null
           status?: string
           story_content?: Json | null
