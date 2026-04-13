@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight, Check, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Loader2, RefreshCw, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
@@ -34,8 +34,9 @@ const BookPreview = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [error, setError] = useState("");
   const [paying, setPaying] = useState(false);
+  const [regeneratingPage, setRegeneratingPage] = useState<number | null>(null);
+  const [regeneratingAll, setRegeneratingAll] = useState(false);
 
-  // Load Razorpay script
   useEffect(() => {
     const script = document.createElement("script");
     script.src = "https://checkout.razorpay.com/v1/checkout.js";
@@ -86,6 +87,58 @@ const BookPreview = () => {
     fetchOrder();
   }, [orderId]);
 
+  const handleRegeneratePage = async () => {
+    if (!orderId || regeneratingPage !== null) return;
+    setRegeneratingPage(currentPage);
+
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke("regenerate-page", {
+        body: { orderId, pageIndex: currentPage, mode: "page" },
+      });
+
+      if (fnError || !data?.success) throw new Error(fnError?.message || "Failed to regenerate page");
+
+      setOrder((prev: any) => ({
+        ...prev,
+        story_content: data.story,
+        illustrations: data.illustrations,
+      }));
+      toast({ title: "Page regenerated! ✨", description: `Page ${currentPage + 1} has been rewritten.` });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+    } finally {
+      setRegeneratingPage(null);
+    }
+  };
+
+  const handleRegenerateAll = async () => {
+    if (!orderId || regeneratingAll) return;
+    setRegeneratingAll(true);
+    setOrder((prev: any) => ({ ...prev, status: "generating" }));
+
+    try {
+      const { data, error: fnError } = await supabase.functions.invoke("regenerate-page", {
+        body: { orderId, mode: "full" },
+      });
+
+      if (fnError || !data?.success) throw new Error(fnError?.message || "Failed to regenerate story");
+
+      setOrder((prev: any) => ({
+        ...prev,
+        status: "preview",
+        story_content: data.story,
+        illustrations: data.illustrations,
+      }));
+      setCurrentPage(0);
+      toast({ title: "New story generated! 📖", description: "Your entire book has been rewritten." });
+    } catch (err: any) {
+      toast({ title: "Error", description: err.message, variant: "destructive" });
+      setOrder((prev: any) => ({ ...prev, status: "preview" }));
+    } finally {
+      setRegeneratingAll(false);
+    }
+  };
+
   const handlePayment = async () => {
     if (!orderId || paying) return;
     setPaying(true);
@@ -125,9 +178,7 @@ const BookPreview = () => {
         },
         prefill: { name: order?.name || "" },
         theme: { color: "#F97316" },
-        modal: {
-          ondismiss: () => setPaying(false),
-        },
+        modal: { ondismiss: () => setPaying(false) },
       };
 
       const rzp = new window.Razorpay(options);
@@ -175,7 +226,9 @@ const BookPreview = () => {
         <Navbar />
         <div className="flex flex-1 flex-col items-center justify-center gap-6 p-8">
           <Loader2 className="h-12 w-12 animate-spin text-primary" />
-          <h2 className="font-display text-2xl font-bold text-foreground">Creating Your Book...</h2>
+          <h2 className="font-display text-2xl font-bold text-foreground">
+            {regeneratingAll ? "Regenerating Your Book..." : "Creating Your Book..."}
+          </h2>
           <p className="max-w-md text-center font-body text-muted-foreground">
             Our AI is writing your personalized story and creating beautiful illustrations. This may take 1-2 minutes.
           </p>
@@ -265,7 +318,14 @@ const BookPreview = () => {
                 transition={{ duration: 0.4 }}
                 className="overflow-hidden rounded-2xl border border-border bg-card shadow-book"
               >
-                {illustrations[currentPage] ? (
+                {regeneratingPage === currentPage ? (
+                  <div className="flex aspect-[4/3] w-full items-center justify-center bg-secondary">
+                    <div className="flex flex-col items-center gap-2">
+                      <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                      <p className="font-body text-sm text-muted-foreground">Regenerating page...</p>
+                    </div>
+                  </div>
+                ) : illustrations[currentPage] ? (
                   <img
                     src={illustrations[currentPage]}
                     alt={`Page ${currentPage + 1} illustration`}
@@ -281,9 +341,21 @@ const BookPreview = () => {
                   <p className="font-body text-base leading-relaxed text-foreground">
                     {story.pages[currentPage].text}
                   </p>
-                  <p className="mt-4 text-right font-display text-sm text-muted-foreground">
-                    Page {currentPage + 1} of {totalPages}
-                  </p>
+                  <div className="mt-4 flex items-center justify-between">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={handleRegeneratePage}
+                      disabled={regeneratingPage !== null}
+                      className="gap-1.5 font-body text-xs text-muted-foreground hover:text-primary"
+                    >
+                      <RefreshCw className={`h-3.5 w-3.5 ${regeneratingPage === currentPage ? "animate-spin" : ""}`} />
+                      Regenerate this page
+                    </Button>
+                    <p className="font-display text-sm text-muted-foreground">
+                      Page {currentPage + 1} of {totalPages}
+                    </p>
+                  </div>
                 </div>
               </motion.div>
             </AnimatePresence>
@@ -317,19 +389,28 @@ const BookPreview = () => {
             </div>
           </div>
 
-          {/* Payment Section */}
+          {/* Actions Section */}
           <div className="mt-10 rounded-2xl border border-border bg-card p-6 text-center">
             <h3 className="mb-2 font-display text-xl font-bold text-foreground">Love Your Book?</h3>
             <p className="mb-4 font-body text-muted-foreground">
               Price: <span className="font-bold text-foreground">{order.cover_type === "hardcover" ? "₹1,299" : "₹999"}</span> ({order.cover_type})
             </p>
-            <div className="flex items-center justify-center gap-4">
+            <div className="flex flex-wrap items-center justify-center gap-3">
+              <Button
+                variant="outline"
+                onClick={handleRegenerateAll}
+                disabled={regeneratingAll || regeneratingPage !== null}
+                className="gap-2 font-body"
+              >
+                <RotateCcw className={`h-4 w-4 ${regeneratingAll ? "animate-spin" : ""}`} />
+                Regenerate Entire Book
+              </Button>
               <Button variant="outline" onClick={() => navigate("/create")} className="font-body">
                 Start Over
               </Button>
               <Button
                 onClick={handlePayment}
-                disabled={paying}
+                disabled={paying || regeneratingPage !== null || regeneratingAll}
                 className="gap-2 bg-gradient-primary font-body font-bold text-primary-foreground shadow-book hover:opacity-90"
               >
                 {paying ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
