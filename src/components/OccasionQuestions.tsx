@@ -16,168 +16,276 @@ interface QuestionDef {
   multiline?: boolean;
 }
 
-const getQuestions = (occasion: string, birthdayType: string, name: string): QuestionDef[] => {
+interface SectionDef {
+  title: string;
+  emoji: string;
+  questions: QuestionDef[];
+}
+
+const getSections = (occasion: string, birthdayType: string, name: string): SectionDef[] => {
   const n = name || "them";
   const ns = name ? `${name}'s` : "their";
 
   switch (occasion) {
-    case "wedding":
+    case "birthday":
+      if (birthdayType === "pet") {
+        return [
+          { title: "Their Personality", emoji: "🐾", questions: [
+            { field: "personality", label: `How would you describe ${ns} personality?`, placeholder: "e.g. Goofy, loyal, and always hungry" },
+            { field: "funnyQuirks", label: `What are ${ns} funniest quirks?`, placeholder: "e.g. Chases their own tail, barks at the mirror" },
+          ]},
+          { title: "Their Favorites", emoji: "❤️", questions: [
+            { field: "favoriteThings", label: `What does ${n} love doing?`, placeholder: "e.g. Fetching balls, napping in sunbeams" },
+            { field: "favoriteTreats", label: `What are ${ns} favorite treats?`, placeholder: "e.g. Peanut butter, chicken treats" },
+            { field: "sleepHabits", label: `Where and how does ${n} sleep?`, placeholder: "e.g. On the couch, curled up in a ball" },
+          ]},
+          { title: "Memorable Moments", emoji: "📸", questions: [
+            { field: "memorableAdventure", label: `${ns} most memorable adventure?`, placeholder: "e.g. Escaped the yard and came back with a huge stick" },
+            { field: "extraDetail1", label: `Relationship with family/other pets?`, placeholder: "e.g. Best friends with the cat, scared of vacuum" },
+          ]},
+          { title: "Why They're Special", emoji: "🌟", questions: [
+            { field: "extraDetail2", label: `What makes ${n} the best pet ever?`, placeholder: "e.g. Always knows when you're sad and comes to cuddle", multiline: true },
+          ]},
+        ];
+      }
       return [
-        { field: "personality", label: `How did ${n} and their partner meet?`, placeholder: "e.g. Through mutual friends at a college party" },
-        { field: "funnyQuirks", label: `What's the funniest thing about their relationship?`, placeholder: "e.g. They argue about who makes better chai" },
-        { field: "favoriteThings", label: `What do they love doing together?`, placeholder: "e.g. Traveling, cooking together, movie marathons" },
-        { field: "hilariousMoment", label: `Share a funny or memorable couple moment`, placeholder: "e.g. The time they got lost on a road trip and ended up at a random village festival", multiline: true },
-        { field: "bestFriends", label: `What's their love story in one line?`, placeholder: "e.g. Best friends who realized they were soulmates" },
-        { field: "memorableAdventure", label: `How did the proposal happen?`, placeholder: "e.g. On a beach in Goa at sunset..." },
-        { field: "extraDetail1", label: `What's their dream honeymoon destination?`, placeholder: "e.g. Maldives, Paris, a road trip across Rajasthan" },
-        { field: "extraDetail2", label: `What song represents their love story?`, placeholder: "e.g. 'Tum Hi Ho', 'Perfect' by Ed Sheeran" },
-        { field: "extraDetail3", label: `What would they say is each other's best quality?`, placeholder: "e.g. She loves his humor, he loves her determination", multiline: true },
+        { title: "Their Story", emoji: "🎂", questions: [
+          { field: "personality", label: `How would you describe ${n} in 3-5 words?`, placeholder: "e.g. Funny, adventurous, always smiling" },
+          { field: "funnyQuirks", label: `What makes ${n} different from everyone else?`, placeholder: "e.g. Always loses their keys, sings in the shower" },
+          { field: "extraDetail3", label: `Something that instantly reminds you of ${n}?`, placeholder: "e.g. Their infectious laugh, a specific gesture" },
+        ]},
+        { title: "Their Journey", emoji: "🛤️", questions: [
+          { field: "favoriteThings", label: `How were they when you first met?`, placeholder: "e.g. Shy but hilarious once you got to know them" },
+          { field: "hilariousMoment", label: `What has changed the most about them?`, placeholder: "e.g. They've become so much more confident", multiline: true },
+          { field: "bestFriends", label: `A phase of life where they grew a lot?`, placeholder: "e.g. After moving to a new city" },
+        ]},
+        { title: "Defining Memories", emoji: "✨", questions: [
+          { field: "memorableAdventure", label: `A moment that made you proud of ${n}`, placeholder: "e.g. When they stood up for a friend", multiline: true },
+          { field: "extraDetail1", label: `A funny moment you'll never forget`, placeholder: "e.g. That time they tried cooking and set off the alarm" },
+        ]},
+        { title: "Appreciation & Future", emoji: "🌟", questions: [
+          { field: "extraDetail2", label: `What do you admire most about ${n}?`, placeholder: "e.g. Their resilience, humor, kindness", multiline: true },
+        ]},
       ];
 
     case "anniversary":
       return [
-        { field: "personality", label: `How many years have they been together?`, placeholder: "e.g. 5 wonderful years" },
-        { field: "funnyQuirks", label: `What's their cutest couple habit?`, placeholder: "e.g. They finish each other's sentences" },
-        { field: "favoriteThings", label: `What's the secret to their relationship?`, placeholder: "e.g. Lots of laughter and never going to bed angry" },
-        { field: "hilariousMoment", label: `Share their most romantic or funny memory`, placeholder: "e.g. Dancing in the rain during their honeymoon", multiline: true },
-        { field: "bestFriends", label: `What do they admire most about each other?`, placeholder: "e.g. Their kindness, sense of humor, determination" },
-        { field: "memorableAdventure", label: `What's their biggest adventure together?`, placeholder: "e.g. Backpacking across Europe for a month" },
-        { field: "extraDetail1", label: `What's their favorite "us" tradition?`, placeholder: "e.g. Sunday morning chai and crosswords" },
-        { field: "extraDetail2", label: `How have they changed each other for the better?`, placeholder: "e.g. She taught him patience, he taught her to be spontaneous", multiline: true },
+        { title: "Where It All Started", emoji: "💕", questions: [
+          { field: "personality", label: `How did you first meet?`, placeholder: "e.g. Through mutual friends at a party" },
+          { field: "funnyQuirks", label: `What was your first impression?`, placeholder: "e.g. Thought they were way out of my league" },
+          { field: "favoriteThings", label: `What stood out about them immediately?`, placeholder: "e.g. Their smile lit up the room" },
+        ]},
+        { title: "Falling in Love", emoji: "💘", questions: [
+          { field: "hilariousMoment", label: `When did you realize you loved them?`, placeholder: "e.g. During a rainy night when they made me laugh through tears", multiline: true },
+          { field: "bestFriends", label: `What moment changed everything?`, placeholder: "e.g. The first road trip together" },
+        ]},
+        { title: "Your Journey Together", emoji: "🛤️", questions: [
+          { field: "memorableAdventure", label: `A challenge you faced together`, placeholder: "e.g. Long distance for a year", multiline: true },
+          { field: "extraDetail1", label: `A moment that strengthened your bond`, placeholder: "e.g. Supporting each other through family troubles" },
+        ]},
+        { title: "The Little Things", emoji: "🥰", questions: [
+          { field: "extraDetail2", label: `Their cutest habit & an inside joke`, placeholder: "e.g. They hum when cooking; 'remember the pizza incident'", multiline: true },
+        ]},
+        { title: "Heart & Forever", emoji: "💖", questions: [
+          { field: "extraDetail3", label: `Something you've never said before & what forever looks like`, placeholder: "e.g. You saved me in ways you'll never know. Forever is Sunday mornings with you.", multiline: true },
+        ]},
       ];
 
-    case "roast":
+    case "wedding":
       return [
-        { field: "personality", label: `What's ${ns} most embarrassing habit?`, placeholder: "e.g. Talks to plants, dances in the elevator" },
-        { field: "funnyQuirks", label: `What's the most ridiculous thing ${n} has ever done?`, placeholder: "e.g. Wore mismatched shoes to a wedding" },
-        { field: "favoriteThings", label: `What does ${n} think they're good at but really aren't?`, placeholder: "e.g. Cooking — they once burned boiled eggs" },
-        { field: "hilariousMoment", label: `Share the most cringe-worthy moment with ${n}`, placeholder: "e.g. Tried to impress a date and walked into a glass door", multiline: true },
-        { field: "bestFriends", label: `What would ${ns} friends roast them about?`, placeholder: "e.g. Always late, terrible taste in music, can't park a car" },
-        { field: "memorableAdventure", label: `Any legendary fails or disasters?`, placeholder: "e.g. Got lost in their own city using Google Maps" },
-        { field: "extraDetail1", label: `What's ${ns} most delusional belief about themselves?`, placeholder: "e.g. Thinks they can sing, believes they're a great driver" },
-        { field: "extraDetail2", label: `What's their go-to excuse when they mess up?`, placeholder: "e.g. 'My alarm didn't go off', 'The WiFi was slow'" },
-        { field: "extraDetail3", label: `If ${n} had a warning label, what would it say?`, placeholder: "e.g. 'Caution: Will steal your fries', 'Warning: Terrible puns ahead'", multiline: true },
+        { title: "The Love Story", emoji: "💒", questions: [
+          { field: "personality", label: `How did the couple meet?`, placeholder: "e.g. Through mutual friends at a college party" },
+          { field: "funnyQuirks", label: `What's the funniest thing about their relationship?`, placeholder: "e.g. They argue about who makes better chai" },
+          { field: "favoriteThings", label: `What do they love doing together?`, placeholder: "e.g. Traveling, cooking together, movie marathons" },
+        ]},
+        { title: "The Journey", emoji: "💍", questions: [
+          { field: "hilariousMoment", label: `How did the proposal happen?`, placeholder: "e.g. On a beach in Goa at sunset...", multiline: true },
+          { field: "bestFriends", label: `What's their love story in one line?`, placeholder: "e.g. Best friends who realized they were soulmates" },
+        ]},
+        { title: "What Makes Them Special", emoji: "✨", questions: [
+          { field: "memorableAdventure", label: `What would they say is each other's best quality?`, placeholder: "e.g. She loves his humor, he loves her determination", multiline: true },
+          { field: "extraDetail1", label: `What song represents their love story?`, placeholder: "e.g. 'Tum Hi Ho', 'Perfect' by Ed Sheeran" },
+        ]},
+        { title: "Dreams", emoji: "🌟", questions: [
+          { field: "extraDetail2", label: `Dream honeymoon & future together?`, placeholder: "e.g. Maldives, building a home full of laughter", multiline: true },
+        ]},
       ];
 
     case "mothers-day":
       return [
-        { field: "personality", label: `How would you describe your mom's personality?`, placeholder: "e.g. Warm, fierce, and always knows best" },
-        { field: "funnyQuirks", label: `What's her most endearing habit?`, placeholder: "e.g. Always packs extra food 'just in case'" },
-        { field: "favoriteThings", label: `What does she love doing in her free time?`, placeholder: "e.g. Gardening, watching old Bollywood movies" },
-        { field: "hilariousMoment", label: `Share a favorite memory with your mom`, placeholder: "e.g. The time she tried to use TikTok and accidentally went live", multiline: true },
-        { field: "bestFriends", label: `What's the most important thing she taught you?`, placeholder: "e.g. To always be kind and to never skip breakfast" },
-        { field: "memorableAdventure", label: `What makes her the best mom?`, placeholder: "e.g. She drops everything when we need her" },
-        { field: "extraDetail1", label: `What's her signature dish or recipe?`, placeholder: "e.g. Her rajma chawal is legendary" },
-        { field: "extraDetail2", label: `What's one thing you wish you could thank her for?`, placeholder: "e.g. Always believing in me even when I didn't", multiline: true },
+        { title: "Her Love", emoji: "💐", questions: [
+          { field: "personality", label: `What makes your mom special?`, placeholder: "e.g. Warm, fierce, and always knows best" },
+          { field: "funnyQuirks", label: `How does she show love?`, placeholder: "e.g. Always packs extra food 'just in case'" },
+        ]},
+        { title: "Childhood Memories", emoji: "🧒", questions: [
+          { field: "favoriteThings", label: `A moment she cared for you that you'll never forget`, placeholder: "e.g. Stayed up all night when I was sick" },
+          { field: "hilariousMoment", label: `A memory where she made everything okay`, placeholder: "e.g. After my first heartbreak, she made my favorite meal", multiline: true },
+        ]},
+        { title: "Her Sacrifices & Strength", emoji: "💪", questions: [
+          { field: "bestFriends", label: `Something she gave up for you`, placeholder: "e.g. Her career to raise us" },
+          { field: "memorableAdventure", label: `A time she showed incredible strength`, placeholder: "e.g. Handled dad's job loss with grace and optimism", multiline: true },
+        ]},
+        { title: "Today & Heart Message", emoji: "❤️", questions: [
+          { field: "extraDetail1", label: `What do you admire about her today?`, placeholder: "e.g. Her patience, her cooking, her unwavering faith" },
+          { field: "extraDetail2", label: `What do you want to say to her now?`, placeholder: "e.g. Thank you for being my rock. I love you more than words.", multiline: true },
+        ]},
       ];
 
     case "fathers-day":
       return [
-        { field: "personality", label: `How would you describe your dad's personality?`, placeholder: "e.g. Strong, funny, and full of dad jokes" },
-        { field: "funnyQuirks", label: `What's his signature dad move?`, placeholder: "e.g. Falls asleep on the couch every Sunday" },
-        { field: "favoriteThings", label: `What does he love doing?`, placeholder: "e.g. Cricket, fixing things around the house, grilling" },
-        { field: "hilariousMoment", label: `Share a classic dad moment`, placeholder: "e.g. The time he tried to 'fix' the WiFi by unplugging everything", multiline: true },
-        { field: "bestFriends", label: `What's the best advice he's given you?`, placeholder: "e.g. Work hard, but don't forget to have fun" },
-        { field: "memorableAdventure", label: `What makes him a great dad?`, placeholder: "e.g. Always there for every school event, no matter what" },
-        { field: "extraDetail1", label: `What's his favorite dad joke?`, placeholder: "e.g. 'I'm not sleeping, I'm just resting my eyes'" },
-        { field: "extraDetail2", label: `What childhood memory with dad do you treasure most?`, placeholder: "e.g. Teaching me to ride a bicycle in the park", multiline: true },
-      ];
-
-    case "graduation":
-      return [
-        { field: "personality", label: `What is ${n} graduating from?`, placeholder: "e.g. Engineering from IIT Delhi" },
-        { field: "funnyQuirks", label: `What was ${ns} funniest college/school moment?`, placeholder: "e.g. Fell asleep during their own presentation" },
-        { field: "favoriteThings", label: `What's ${ns} dream or next big goal?`, placeholder: "e.g. Working at a top tech company, traveling the world" },
-        { field: "hilariousMoment", label: `Share a memorable moment from their journey`, placeholder: "e.g. Pulling an all-nighter before finals and still acing the exam", multiline: true },
-        { field: "bestFriends", label: `Who were their closest friends during this journey?`, placeholder: "e.g. Their study group: Ravi, Priya, and Aditya" },
-        { field: "memorableAdventure", label: `What are you most proud of about ${n}?`, placeholder: "e.g. Their determination to never give up" },
-        { field: "extraDetail1", label: `What was ${ns} biggest challenge and how did they overcome it?`, placeholder: "e.g. Failed an exam but came back stronger", multiline: true },
-        { field: "extraDetail2", label: `What's their spirit animal or motto?`, placeholder: "e.g. 'Work hard, party harder' / A phoenix" },
-      ];
-
-    case "retirement":
-      return [
-        { field: "personality", label: `What was ${ns} career/profession?`, placeholder: "e.g. 35 years as a school teacher" },
-        { field: "funnyQuirks", label: `What will they NOT miss about work?`, placeholder: "e.g. Monday morning meetings, the commute" },
-        { field: "favoriteThings", label: `What are they excited to do in retirement?`, placeholder: "e.g. Travel, learn painting, spend time with grandkids" },
-        { field: "hilariousMoment", label: `Share a legendary work story about ${n}`, placeholder: "e.g. The time they accidentally replied-all to the entire company", multiline: true },
-        { field: "bestFriends", label: `What's the biggest lesson from their career?`, placeholder: "e.g. Patience and persistence pay off" },
-        { field: "memorableAdventure", label: `What will colleagues miss most about ${n}?`, placeholder: "e.g. Their humor, mentorship, and legendary chai breaks" },
-        { field: "extraDetail1", label: `What's their proudest professional achievement?`, placeholder: "e.g. Mentored 500+ students who went on to great careers" },
-        { field: "extraDetail2", label: `What's their retirement bucket list?`, placeholder: "e.g. Learn guitar, visit Japan, write a book", multiline: true },
+        { title: "Who He Is", emoji: "👔", questions: [
+          { field: "personality", label: `Describe your dad in 3-5 words`, placeholder: "e.g. Strong, funny, and full of dad jokes" },
+          { field: "funnyQuirks", label: `What is his "dad signature move"?`, placeholder: "e.g. Falls asleep on the couch every Sunday" },
+        ]},
+        { title: "Childhood Memories", emoji: "🧒", questions: [
+          { field: "favoriteThings", label: `Your earliest memory with him`, placeholder: "e.g. Him teaching me to ride a bicycle" },
+          { field: "hilariousMoment", label: `A moment he protected or supported you`, placeholder: "e.g. Drove 3 hours in rain to pick me up from camp", multiline: true },
+        ]},
+        { title: "Sacrifices & Lessons", emoji: "📖", questions: [
+          { field: "bestFriends", label: `A silent sacrifice he made`, placeholder: "e.g. Worked double shifts so I could go to college" },
+          { field: "memorableAdventure", label: `One lesson he taught you that stayed`, placeholder: "e.g. Work hard but never forget to have fun" },
+        ]},
+        { title: "The Unsaid", emoji: "💙", questions: [
+          { field: "extraDetail1", label: `Something you never told him`, placeholder: "e.g. I'm proud to be your kid" },
+          { field: "extraDetail2", label: `What you want to thank him for`, placeholder: "e.g. For being there every single time, even when I didn't ask", multiline: true },
+        ]},
       ];
 
     case "farewell":
       return [
-        { field: "personality", label: `Where is ${n} going or what's changing?`, placeholder: "e.g. Moving to London, switching jobs, leaving the team" },
-        { field: "funnyQuirks", label: `What will everyone miss most about ${n}?`, placeholder: "e.g. Their laugh, the snacks they always shared" },
-        { field: "favoriteThings", label: `What was ${ns} signature move at work/school?`, placeholder: "e.g. Always the first to crack a joke in meetings" },
-        { field: "hilariousMoment", label: `Share a favorite memory together`, placeholder: "e.g. The team trip where everything went hilariously wrong", multiline: true },
-        { field: "bestFriends", label: `What's a wish or message for ${n}?`, placeholder: "e.g. Keep being awesome and don't forget us!" },
-        { field: "memorableAdventure", label: `Describe ${n} in 3 words`, placeholder: "e.g. Loyal, hilarious, irreplaceable" },
-        { field: "extraDetail1", label: `What inside joke or catchphrase will you always associate with ${n}?`, placeholder: "e.g. 'That's what she said', always saying 'let's grab chai'" },
-        { field: "extraDetail2", label: `What gift or superpower would you give ${n} for their next chapter?`, placeholder: "e.g. Unlimited confidence, a GPS that actually works" },
+        { title: "The Journey", emoji: "👋", questions: [
+          { field: "personality", label: `Where is ${n} going or what's changing?`, placeholder: "e.g. Moving to London, switching jobs" },
+          { field: "funnyQuirks", label: `When did this journey start & what made it special?`, placeholder: "e.g. 3 years ago, best team ever" },
+        ]},
+        { title: "Memories Together", emoji: "📸", questions: [
+          { field: "favoriteThings", label: `Your favorite moment together`, placeholder: "e.g. The team trip where everything went hilariously wrong" },
+          { field: "hilariousMoment", label: `A funny incident you'll always remember`, placeholder: "e.g. They accidentally emailed the CEO a meme", multiline: true },
+        ]},
+        { title: "Impact & Missing", emoji: "💔", questions: [
+          { field: "bestFriends", label: `How did ${n} impact your life?`, placeholder: "e.g. They taught me to not take things too seriously" },
+          { field: "memorableAdventure", label: `What will you miss the most?`, placeholder: "e.g. Their laugh, the snacks they always shared", multiline: true },
+        ]},
+        { title: "Goodbye Message", emoji: "✈️", questions: [
+          { field: "extraDetail1", label: `Your message & wish for ${n}`, placeholder: "e.g. Keep being awesome, the world needs more of you", multiline: true },
+        ]},
+      ];
+
+    case "graduation":
+      return [
+        { title: "The Beginning", emoji: "🎓", questions: [
+          { field: "personality", label: `What is ${n} graduating from?`, placeholder: "e.g. Engineering from IIT Delhi" },
+          { field: "funnyQuirks", label: `What were the expectations at the start?`, placeholder: "e.g. Nervous but excited to start a new chapter" },
+        ]},
+        { title: "The Experience", emoji: "📚", questions: [
+          { field: "favoriteThings", label: `Best memory from this journey`, placeholder: "e.g. The late-night study sessions that turned into parties" },
+          { field: "hilariousMoment", label: `Hardest moment & how they overcame it`, placeholder: "e.g. Failed an exam but came back stronger", multiline: true },
+        ]},
+        { title: "Growth & People", emoji: "🌱", questions: [
+          { field: "bestFriends", label: `How have they changed through this journey?`, placeholder: "e.g. From shy to confident, from unsure to determined" },
+          { field: "memorableAdventure", label: `Who made it special? Closest friends/mentors`, placeholder: "e.g. Ravi, Priya — the study group that became family" },
+        ]},
+        { title: "Future & Pride", emoji: "🚀", questions: [
+          { field: "extraDetail1", label: `What are you most proud of about ${n}?`, placeholder: "e.g. Their determination to never give up" },
+          { field: "extraDetail2", label: `Dreams & wishes for what's next`, placeholder: "e.g. Conquer the world, stay curious, never stop growing", multiline: true },
+        ]},
+      ];
+
+    case "roast":
+      return [
+        { title: "The Roast Begins 🔥", emoji: "😈", questions: [
+          { field: "personality", label: `What makes ${n} roast-worthy?`, placeholder: "e.g. Thinks they're Gordon Ramsay but burns toast" },
+          { field: "funnyQuirks", label: `Most annoying habit?`, placeholder: "e.g. Always late, talks during movies" },
+        ]},
+        { title: "Epic Fails", emoji: "🤦", questions: [
+          { field: "favoriteThings", label: `What does ${n} think they're good at but really aren't?`, placeholder: "e.g. Cooking — once burned boiled eggs" },
+          { field: "hilariousMoment", label: `Most cringe-worthy moment with ${n}`, placeholder: "e.g. Tried to impress a date and walked into a glass door", multiline: true },
+        ]},
+        { title: "The Roast Lines", emoji: "🎤", questions: [
+          { field: "bestFriends", label: `What would friends roast them about?`, placeholder: "e.g. Always late, terrible music taste, can't park" },
+          { field: "memorableAdventure", label: `Write 2-3 savage roast lines`, placeholder: "e.g. 'Your cooking is why delivery apps exist'", multiline: true },
+          { field: "extraDetail1", label: `If ${n} had a warning label, what would it say?`, placeholder: "e.g. 'Caution: Will steal your fries'" },
+        ]},
+        { title: "The Soft Ending 😄", emoji: "❤️", questions: [
+          { field: "extraDetail2", label: `One genuinely nice thing about ${n}`, placeholder: "e.g. Despite everything, they're the most loyal friend ever", multiline: true },
+        ]},
+      ];
+
+    case "retirement":
+      return [
+        { title: "The Career", emoji: "💼", questions: [
+          { field: "personality", label: `What was ${ns} career/profession?`, placeholder: "e.g. 35 years as a school teacher" },
+          { field: "funnyQuirks", label: `What will they NOT miss about work?`, placeholder: "e.g. Monday morning meetings, the commute" },
+        ]},
+        { title: "Work Stories", emoji: "📸", questions: [
+          { field: "favoriteThings", label: `What are they excited to do in retirement?`, placeholder: "e.g. Travel, painting, time with grandkids" },
+          { field: "hilariousMoment", label: `A legendary work story about ${n}`, placeholder: "e.g. Accidentally replied-all to the entire company", multiline: true },
+        ]},
+        { title: "Legacy", emoji: "🏆", questions: [
+          { field: "bestFriends", label: `What's the biggest lesson from their career?`, placeholder: "e.g. Patience and persistence pay off" },
+          { field: "memorableAdventure", label: `Their proudest professional achievement`, placeholder: "e.g. Mentored 500+ students" },
+        ]},
+        { title: "What's Next", emoji: "🌅", questions: [
+          { field: "extraDetail1", label: `What will colleagues miss most?`, placeholder: "e.g. Their humor, mentorship, legendary chai breaks" },
+          { field: "extraDetail2", label: `Their retirement bucket list`, placeholder: "e.g. Learn guitar, visit Japan, write a book", multiline: true },
+        ]},
       ];
 
     case "new-baby":
       return [
-        { field: "personality", label: `What's the baby's name (or expected name)?`, placeholder: "e.g. Baby Arya" },
-        { field: "funnyQuirks", label: `How are the parents feeling?`, placeholder: "e.g. Excited, nervous, and already losing sleep!" },
-        { field: "favoriteThings", label: `Any special meaning behind the baby's name?`, placeholder: "e.g. Named after their grandmother" },
-        { field: "hilariousMoment", label: `Share a funny pregnancy or parenting moment`, placeholder: "e.g. Dad fainted during the ultrasound", multiline: true },
-        { field: "bestFriends", label: `What are the parents' hopes for the baby?`, placeholder: "e.g. To be kind, curious, and always loved" },
-        { field: "memorableAdventure", label: `Who's most excited about the new arrival?`, placeholder: "e.g. The grandparents — they've already bought 50 outfits" },
-        { field: "extraDetail1", label: `What does the nursery look like?`, placeholder: "e.g. Jungle theme with tiny animal plushies everywhere" },
-        { field: "extraDetail2", label: `What family traditions will the baby grow up with?`, placeholder: "e.g. Sunday family dinners, annual beach trips", multiline: true },
+        { title: "The New Arrival", emoji: "👶", questions: [
+          { field: "personality", label: `Baby's name (or expected name)?`, placeholder: "e.g. Baby Arya" },
+          { field: "funnyQuirks", label: `How are the parents feeling?`, placeholder: "e.g. Excited, nervous, already losing sleep!" },
+          { field: "favoriteThings", label: `Special meaning behind the name?`, placeholder: "e.g. Named after their grandmother" },
+        ]},
+        { title: "Funny Moments", emoji: "😄", questions: [
+          { field: "hilariousMoment", label: `A funny pregnancy or parenting moment`, placeholder: "e.g. Dad fainted during the ultrasound", multiline: true },
+        ]},
+        { title: "Hopes & Dreams", emoji: "🌟", questions: [
+          { field: "bestFriends", label: `Parents' hopes for the baby?`, placeholder: "e.g. To be kind, curious, and always loved" },
+          { field: "memorableAdventure", label: `Who's most excited about the arrival?`, placeholder: "e.g. The grandparents — already bought 50 outfits" },
+        ]},
+        { title: "Family & Traditions", emoji: "👨‍👩‍👧", questions: [
+          { field: "extraDetail1", label: `What does the nursery look like?`, placeholder: "e.g. Jungle theme with tiny animal plushies" },
+          { field: "extraDetail2", label: `Family traditions the baby will grow up with?`, placeholder: "e.g. Sunday family dinners, annual beach trips", multiline: true },
+        ]},
       ];
 
     case "bachelorette":
       return [
-        { field: "personality", label: `Describe the bride-to-be in 3 words`, placeholder: "e.g. Wild, kind, unstoppable" },
-        { field: "funnyQuirks", label: `What's her most hilarious dating story?`, placeholder: "e.g. Went on a date and accidentally called them by her ex's name" },
-        { field: "favoriteThings", label: `What does she love most about her partner?`, placeholder: "e.g. Their patience with her shopping addiction" },
-        { field: "hilariousMoment", label: `Share the craziest girls' night out moment`, placeholder: "e.g. They ended up at karaoke singing until 3 AM", multiline: true },
-        { field: "bestFriends", label: `Who are her ride-or-die friends?`, placeholder: "e.g. Meera, Ananya, and Kavya — the squad since college" },
-        { field: "memorableAdventure", label: `What's the bride's guilty pleasure?`, placeholder: "e.g. Reality TV and midnight ice cream runs" },
-        { field: "extraDetail1", label: `What's the funniest thing about her relationship?`, placeholder: "e.g. They have a dedicated meme chat with 10,000+ messages" },
-        { field: "extraDetail2", label: `What advice would her friends give the groom?`, placeholder: "e.g. Never touch the thermostat, always agree on food choices", multiline: true },
-      ];
-
-    case "birthday":
-      if (birthdayType === "pet") {
-        return [
-          { field: "personality", label: `How would you describe ${ns} personality?`, placeholder: "e.g. Goofy, loyal, and always hungry" },
-          { field: "funnyQuirks", label: `What are ${ns} funniest quirks?`, placeholder: "e.g. Chases their own tail, barks at the mirror" },
-          { field: "favoriteThings", label: `What does ${n} love doing?`, placeholder: "e.g. Fetching balls, napping in sunbeams, stealing socks" },
-          { field: "favoriteTreats", label: `What are ${ns} favorite treats?`, placeholder: "e.g. Peanut butter, chicken treats, cheese" },
-          { field: "sleepHabits", label: `Where and how does ${n} sleep?`, placeholder: "e.g. On the couch, curled up in a ball, steals the bed" },
-          { field: "memorableAdventure", label: `What's ${ns} most memorable adventure?`, placeholder: "e.g. The time they escaped the yard and came back with a stick twice their size" },
-          { field: "extraDetail1", label: `What's ${ns} relationship with other pets or family members?`, placeholder: "e.g. Best friends with the cat, scared of the vacuum" },
-          { field: "extraDetail2", label: `What makes ${n} the best pet ever?`, placeholder: "e.g. Always knows when you're sad and comes to cuddle", multiline: true },
-        ];
-      }
-      return [
-        { field: "personality", label: `How would you describe ${ns} personality?`, placeholder: "e.g. Funny, adventurous, always smiling" },
-        { field: "funnyQuirks", label: `What are ${ns} funniest quirks or habits?`, placeholder: "e.g. Always loses their keys, sings in the shower" },
-        { field: "favoriteThings", label: `What does ${n} love doing?`, placeholder: "e.g. Cooking, hiking, binge-watching shows" },
-        { field: "hilariousMoment", label: `Share a hilarious moment with ${n}`, placeholder: "e.g. That time they tried to cook and set off the fire alarm", multiline: true },
-        { field: "bestFriends", label: `Who are ${ns} best friends?`, placeholder: "e.g. Jake, Sarah, and their dog Bruno" },
-        { field: "memorableAdventure", label: `What's ${ns} most memorable adventure?`, placeholder: "e.g. Road trip to Goa, camping in the mountains" },
-        { field: "extraDetail1", label: `What's ${ns} dream birthday wish?`, placeholder: "e.g. A surprise party, skydiving, a trip to Bali" },
-        { field: "extraDetail2", label: `What's one thing about ${n} that always makes people smile?`, placeholder: "e.g. Their infectious laugh, the way they tell stories", multiline: true },
+        { title: "The Bride-to-Be", emoji: "💃", questions: [
+          { field: "personality", label: `Describe her in 3 words`, placeholder: "e.g. Wild, kind, unstoppable" },
+          { field: "funnyQuirks", label: `Her most hilarious dating story?`, placeholder: "e.g. Accidentally called a date by her ex's name" },
+        ]},
+        { title: "The Love Story", emoji: "💕", questions: [
+          { field: "favoriteThings", label: `What does she love most about her partner?`, placeholder: "e.g. Their patience with her shopping addiction" },
+          { field: "hilariousMoment", label: `Craziest girls' night out moment`, placeholder: "e.g. Ended up at karaoke singing until 3 AM", multiline: true },
+        ]},
+        { title: "The Squad", emoji: "👯", questions: [
+          { field: "bestFriends", label: `Who are her ride-or-die friends?`, placeholder: "e.g. Meera, Ananya, and Kavya — since college" },
+          { field: "memorableAdventure", label: `Her guilty pleasure?`, placeholder: "e.g. Reality TV and midnight ice cream runs" },
+        ]},
+        { title: "Advice for the Groom", emoji: "😂", questions: [
+          { field: "extraDetail1", label: `Funniest thing about her relationship?`, placeholder: "e.g. Dedicated meme chat with 10,000+ messages" },
+          { field: "extraDetail2", label: `Advice for the groom?`, placeholder: "e.g. Never touch the thermostat, always agree on food", multiline: true },
+        ]},
       ];
 
     case "just-because":
     default:
       return [
-        { field: "personality", label: `How would you describe ${ns} personality?`, placeholder: "e.g. Funny, adventurous, always smiling" },
-        { field: "funnyQuirks", label: `What are ${ns} funniest quirks or habits?`, placeholder: "e.g. Always loses their keys, sings in the shower" },
-        { field: "favoriteThings", label: `What does ${n} love doing?`, placeholder: "e.g. Cooking, hiking, binge-watching shows" },
-        { field: "hilariousMoment", label: `Share a favorite memory with ${n}`, placeholder: "e.g. That spontaneous road trip you took together", multiline: true },
-        { field: "bestFriends", label: `Who are ${ns} closest people?`, placeholder: "e.g. Jake, Sarah, and their dog Bruno" },
-        { field: "memorableAdventure", label: `What makes ${n} special?`, placeholder: "e.g. Their ability to make everyone laugh" },
-        { field: "extraDetail1", label: `What's a secret talent or hidden skill ${n} has?`, placeholder: "e.g. Can solve a Rubik's cube in under a minute" },
-        { field: "extraDetail2", label: `If ${n} could live in any fictional world, which would it be?`, placeholder: "e.g. Hogwarts, Middle Earth, the Marvel universe" },
+        { title: "About Them", emoji: "✨", questions: [
+          { field: "personality", label: `How would you describe ${n}?`, placeholder: "e.g. Funny, adventurous, always smiling" },
+          { field: "funnyQuirks", label: `Funniest quirks or habits?`, placeholder: "e.g. Always loses their keys, sings in shower" },
+          { field: "favoriteThings", label: `What does ${n} love doing?`, placeholder: "e.g. Cooking, hiking, binge-watching shows" },
+        ]},
+        { title: "Memories", emoji: "📸", questions: [
+          { field: "hilariousMoment", label: `Share a favorite memory with ${n}`, placeholder: "e.g. That spontaneous road trip", multiline: true },
+          { field: "memorableAdventure", label: `What makes ${n} special?`, placeholder: "e.g. Their ability to make everyone laugh" },
+        ]},
+        { title: "Personal Touch", emoji: "🌟", questions: [
+          { field: "extraDetail1", label: `A secret talent or hidden skill?`, placeholder: "e.g. Can solve a Rubik's cube in under a minute" },
+          { field: "extraDetail2", label: `If ${n} could live in any fictional world?`, placeholder: "e.g. Hogwarts, Middle Earth, the Marvel universe" },
+        ]},
       ];
   }
 };
@@ -194,12 +302,12 @@ const occasionTitles: Record<string, string> = {
   "new-baby": "Welcome the Little One 👶",
   bachelorette: "About the Bride-to-Be 💃",
   birthday: "Tell Us About the Birthday Star 🎂",
-  "just-because": "Tell Us More",
+  "just-because": "Tell Us More ✨",
 };
 
 const occasionSubtitles: Record<string, string> = {
   wedding: "Help us write a beautiful love story for the couple!",
-  anniversary: "Share what makes their relationship magical.",
+  anniversary: "Share what makes their love story magical.",
   roast: "Don't hold back — the funnier, the better! 😈",
   "mothers-day": "Help us create a heartfelt tribute to mom.",
   "fathers-day": "Let's celebrate everything that makes dad awesome.",
@@ -207,16 +315,16 @@ const occasionSubtitles: Record<string, string> = {
   retirement: "Let's honor an incredible career.",
   farewell: "Help us create a memorable send-off.",
   "new-baby": "Share the excitement of this new chapter!",
-  bachelorette: "Let's make this book as fun as the party!",
-  birthday: "The more you share, the more personal the book!",
-  "just-because": "The more you share, the more personal the book will be!",
+  bachelorette: "Let's celebrate the bride-to-be!",
+  birthday: "The more you share, the more magical the book!",
+  "just-because": "Share what makes them special!",
 };
 
 const OccasionQuestions = ({ occasion, birthdayType, name, form, onUpdate }: OccasionQuestionsProps) => {
   const effectiveOccasion = occasion || "just-because";
-  const questions = getQuestions(effectiveOccasion, birthdayType, name);
-  const title = occasionTitles[effectiveOccasion] || `Tell us more about ${name || "them"}`;
-  const subtitle = occasionSubtitles[effectiveOccasion] || "The more you share, the more personal the book will be!";
+  const title = occasionTitles[effectiveOccasion] || "Tell Us More ✨";
+  const subtitle = occasionSubtitles[effectiveOccasion] || "Share what makes them special!";
+  const sections = getSections(effectiveOccasion, birthdayType, name);
 
   return (
     <div className="space-y-6">
@@ -224,29 +332,35 @@ const OccasionQuestions = ({ occasion, birthdayType, name, form, onUpdate }: Occ
         <h2 className="mb-2 font-display text-2xl font-bold text-foreground">{title}</h2>
         <p className="font-body text-muted-foreground">{subtitle}</p>
       </div>
-      <div className="space-y-4 rounded-2xl border border-border bg-card p-6">
-        {questions.map(q => (
-          <div key={q.field}>
-            <Label className="font-body font-semibold">{q.label}</Label>
-            {q.multiline ? (
-              <textarea
-                placeholder={q.placeholder}
-                value={form[q.field] || ""}
-                onChange={e => onUpdate(q.field, e.target.value)}
-                rows={2}
-                className="mt-1.5 w-full rounded-lg border border-input bg-background px-3 py-2 font-body text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-              />
-            ) : (
-              <Input
-                placeholder={q.placeholder}
-                value={form[q.field] || ""}
-                onChange={e => onUpdate(q.field, e.target.value)}
-                className="mt-1.5"
-              />
-            )}
-          </div>
-        ))}
-      </div>
+
+      {sections.map((section, sIdx) => (
+        <div key={sIdx} className="rounded-2xl border border-border bg-card p-5 space-y-4">
+          <h3 className="font-display text-sm font-bold text-foreground flex items-center gap-2">
+            <span className="text-lg">{section.emoji}</span> {section.title}
+          </h3>
+          {section.questions.map((q) => (
+            <div key={q.field}>
+              <Label className="font-body text-sm font-medium text-foreground">{q.label}</Label>
+              {q.multiline ? (
+                <textarea
+                  placeholder={q.placeholder}
+                  value={form[q.field] || ""}
+                  onChange={(e) => onUpdate(q.field, e.target.value)}
+                  rows={3}
+                  className="mt-1.5 w-full rounded-lg border border-input bg-background px-3 py-2 font-body text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+                />
+              ) : (
+                <Input
+                  placeholder={q.placeholder}
+                  value={form[q.field] || ""}
+                  onChange={(e) => onUpdate(q.field, e.target.value)}
+                  className="mt-1.5"
+                />
+              )}
+            </div>
+          ))}
+        </div>
+      ))}
     </div>
   );
 };
