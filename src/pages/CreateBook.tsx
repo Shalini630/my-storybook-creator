@@ -95,6 +95,9 @@ const CreateBook = () => {
     favoriteTreats: "",
     sleepHabits: "",
     memorableAdventure: "",
+    extraDetail1: "",
+    extraDetail2: "",
+    extraDetail3: "",
     // Book config
     theme: "",
     tone: "",
