@@ -74,7 +74,7 @@ ${order.interests ? `Loves: ${order.interests}` : ""}
 ${order.favorite_character ? `Favorite character: ${order.favorite_character}` : ""}
 ${order.personal_message ? `Details: ${order.personal_message}` : ""}
 ${order.dedication ? `Dedication: ${order.dedication}` : ""}
-Create exactly 4 pages. Each page: pageNumber, short paragraph (3-5 sentences, age-appropriate), vivid illustration description.
+Create exactly 8 pages. Each page: pageNumber, short paragraph (3-5 sentences, age-appropriate), vivid illustration description.
 Return JSON: {"title":"string","pages":[{"pageNumber":1,"text":"string","illustrationPrompt":"string"}]}`
       : `Create a personalized storybook for an adult named ${order.name}.
 Genre: ${order.theme}. Tone: ${order.tone || "Heartfelt"}. Relationship: ${order.relationship || "For myself"}.
@@ -82,7 +82,7 @@ ${order.hobbies ? `Hobbies: ${order.hobbies}` : ""}
 ${order.favorite_memory ? `Memory: ${order.favorite_memory}` : ""}
 ${order.personal_message ? `Details: ${order.personal_message}` : ""}
 ${order.dedication ? `Dedication: ${order.dedication}` : ""}
-Create exactly 4 pages. Each page: pageNumber, engaging paragraph (4-6 sentences), vivid illustration description.
+Create exactly 8 pages. Each page: pageNumber, engaging paragraph (4-6 sentences), vivid illustration description.
 Return JSON: {"title":"string","pages":[{"pageNumber":1,"text":"string","illustrationPrompt":"string"}]}`;
 
     console.log("Generating story for order:", orderId);

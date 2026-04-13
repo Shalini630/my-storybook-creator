@@ -95,6 +95,9 @@ const CreateBook = () => {
     favoriteTreats: "",
     sleepHabits: "",
     memorableAdventure: "",
+    extraDetail1: "",
+    extraDetail2: "",
+    extraDetail3: "",
     // Book config
     theme: "",
     tone: "",
@@ -396,6 +399,9 @@ const CreateBook = () => {
                     favoriteTreats: form.favoriteTreats,
                     sleepHabits: form.sleepHabits,
                     memorableAdventure: form.memorableAdventure,
+                    extraDetail1: form.extraDetail1,
+                    extraDetail2: form.extraDetail2,
+                    extraDetail3: form.extraDetail3,
                   }}
                   onUpdate={(field, value) => setForm({ ...form, [field]: value })}
                 />
@@ -540,6 +546,7 @@ const CreateBook = () => {
 
                     // Build personality string for the AI
                     const personalityDetails = [
+                      form.occasion && `Occasion: ${form.occasion}`,
                       form.personality && `Personality: ${form.personality}`,
                       form.funnyQuirks && `Quirks: ${form.funnyQuirks}`,
                       form.favoriteThings && `Favorite things: ${form.favoriteThings}`,
@@ -548,6 +555,9 @@ const CreateBook = () => {
                       form.favoriteTreats && `Favorite treats: ${form.favoriteTreats}`,
                       form.sleepHabits && `Sleep habits: ${form.sleepHabits}`,
                       form.memorableAdventure && `Memorable adventure: ${form.memorableAdventure}`,
+                      form.extraDetail1 && `Extra detail: ${form.extraDetail1}`,
+                      form.extraDetail2 && `Extra detail: ${form.extraDetail2}`,
+                      form.extraDetail3 && `Extra detail: ${form.extraDetail3}`,
                     ].filter(Boolean).join(". ");
 
                     const { data: order, error: insertError } = await supabase

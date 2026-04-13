@@ -29,6 +29,9 @@ const getQuestions = (occasion: string, birthdayType: string, name: string): Que
         { field: "hilariousMoment", label: `Share a funny or memorable couple moment`, placeholder: "e.g. The time they got lost on a road trip and ended up at a random village festival", multiline: true },
         { field: "bestFriends", label: `What's their love story in one line?`, placeholder: "e.g. Best friends who realized they were soulmates" },
         { field: "memorableAdventure", label: `How did the proposal happen?`, placeholder: "e.g. On a beach in Goa at sunset..." },
+        { field: "extraDetail1", label: `What's their dream honeymoon destination?`, placeholder: "e.g. Maldives, Paris, a road trip across Rajasthan" },
+        { field: "extraDetail2", label: `What song represents their love story?`, placeholder: "e.g. 'Tum Hi Ho', 'Perfect' by Ed Sheeran" },
+        { field: "extraDetail3", label: `What would they say is each other's best quality?`, placeholder: "e.g. She loves his humor, he loves her determination", multiline: true },
       ];
 
     case "anniversary":
@@ -39,6 +42,8 @@ const getQuestions = (occasion: string, birthdayType: string, name: string): Que
         { field: "hilariousMoment", label: `Share their most romantic or funny memory`, placeholder: "e.g. Dancing in the rain during their honeymoon", multiline: true },
         { field: "bestFriends", label: `What do they admire most about each other?`, placeholder: "e.g. Their kindness, sense of humor, determination" },
         { field: "memorableAdventure", label: `What's their biggest adventure together?`, placeholder: "e.g. Backpacking across Europe for a month" },
+        { field: "extraDetail1", label: `What's their favorite "us" tradition?`, placeholder: "e.g. Sunday morning chai and crosswords" },
+        { field: "extraDetail2", label: `How have they changed each other for the better?`, placeholder: "e.g. She taught him patience, he taught her to be spontaneous", multiline: true },
       ];
 
     case "roast":
@@ -49,6 +54,9 @@ const getQuestions = (occasion: string, birthdayType: string, name: string): Que
         { field: "hilariousMoment", label: `Share the most cringe-worthy moment with ${n}`, placeholder: "e.g. Tried to impress a date and walked into a glass door", multiline: true },
         { field: "bestFriends", label: `What would ${ns} friends roast them about?`, placeholder: "e.g. Always late, terrible taste in music, can't park a car" },
         { field: "memorableAdventure", label: `Any legendary fails or disasters?`, placeholder: "e.g. Got lost in their own city using Google Maps" },
+        { field: "extraDetail1", label: `What's ${ns} most delusional belief about themselves?`, placeholder: "e.g. Thinks they can sing, believes they're a great driver" },
+        { field: "extraDetail2", label: `What's their go-to excuse when they mess up?`, placeholder: "e.g. 'My alarm didn't go off', 'The WiFi was slow'" },
+        { field: "extraDetail3", label: `If ${n} had a warning label, what would it say?`, placeholder: "e.g. 'Caution: Will steal your fries', 'Warning: Terrible puns ahead'", multiline: true },
       ];
 
     case "mothers-day":
@@ -59,6 +67,8 @@ const getQuestions = (occasion: string, birthdayType: string, name: string): Que
         { field: "hilariousMoment", label: `Share a favorite memory with your mom`, placeholder: "e.g. The time she tried to use TikTok and accidentally went live", multiline: true },
         { field: "bestFriends", label: `What's the most important thing she taught you?`, placeholder: "e.g. To always be kind and to never skip breakfast" },
         { field: "memorableAdventure", label: `What makes her the best mom?`, placeholder: "e.g. She drops everything when we need her" },
+        { field: "extraDetail1", label: `What's her signature dish or recipe?`, placeholder: "e.g. Her rajma chawal is legendary" },
+        { field: "extraDetail2", label: `What's one thing you wish you could thank her for?`, placeholder: "e.g. Always believing in me even when I didn't", multiline: true },
       ];
 
     case "fathers-day":
@@ -69,6 +79,8 @@ const getQuestions = (occasion: string, birthdayType: string, name: string): Que
         { field: "hilariousMoment", label: `Share a classic dad moment`, placeholder: "e.g. The time he tried to 'fix' the WiFi by unplugging everything", multiline: true },
         { field: "bestFriends", label: `What's the best advice he's given you?`, placeholder: "e.g. Work hard, but don't forget to have fun" },
         { field: "memorableAdventure", label: `What makes him a great dad?`, placeholder: "e.g. Always there for every school event, no matter what" },
+        { field: "extraDetail1", label: `What's his favorite dad joke?`, placeholder: "e.g. 'I'm not sleeping, I'm just resting my eyes'" },
+        { field: "extraDetail2", label: `What childhood memory with dad do you treasure most?`, placeholder: "e.g. Teaching me to ride a bicycle in the park", multiline: true },
       ];
 
     case "graduation":
@@ -79,6 +91,8 @@ const getQuestions = (occasion: string, birthdayType: string, name: string): Que
         { field: "hilariousMoment", label: `Share a memorable moment from their journey`, placeholder: "e.g. Pulling an all-nighter before finals and still acing the exam", multiline: true },
         { field: "bestFriends", label: `Who were their closest friends during this journey?`, placeholder: "e.g. Their study group: Ravi, Priya, and Aditya" },
         { field: "memorableAdventure", label: `What are you most proud of about ${n}?`, placeholder: "e.g. Their determination to never give up" },
+        { field: "extraDetail1", label: `What was ${ns} biggest challenge and how did they overcome it?`, placeholder: "e.g. Failed an exam but came back stronger", multiline: true },
+        { field: "extraDetail2", label: `What's their spirit animal or motto?`, placeholder: "e.g. 'Work hard, party harder' / A phoenix" },
       ];
 
     case "retirement":
@@ -89,6 +103,8 @@ const getQuestions = (occasion: string, birthdayType: string, name: string): Que
         { field: "hilariousMoment", label: `Share a legendary work story about ${n}`, placeholder: "e.g. The time they accidentally replied-all to the entire company", multiline: true },
         { field: "bestFriends", label: `What's the biggest lesson from their career?`, placeholder: "e.g. Patience and persistence pay off" },
         { field: "memorableAdventure", label: `What will colleagues miss most about ${n}?`, placeholder: "e.g. Their humor, mentorship, and legendary chai breaks" },
+        { field: "extraDetail1", label: `What's their proudest professional achievement?`, placeholder: "e.g. Mentored 500+ students who went on to great careers" },
+        { field: "extraDetail2", label: `What's their retirement bucket list?`, placeholder: "e.g. Learn guitar, visit Japan, write a book", multiline: true },
       ];
 
     case "farewell":
@@ -99,6 +115,8 @@ const getQuestions = (occasion: string, birthdayType: string, name: string): Que
         { field: "hilariousMoment", label: `Share a favorite memory together`, placeholder: "e.g. The team trip where everything went hilariously wrong", multiline: true },
         { field: "bestFriends", label: `What's a wish or message for ${n}?`, placeholder: "e.g. Keep being awesome and don't forget us!" },
         { field: "memorableAdventure", label: `Describe ${n} in 3 words`, placeholder: "e.g. Loyal, hilarious, irreplaceable" },
+        { field: "extraDetail1", label: `What inside joke or catchphrase will you always associate with ${n}?`, placeholder: "e.g. 'That's what she said', always saying 'let's grab chai'" },
+        { field: "extraDetail2", label: `What gift or superpower would you give ${n} for their next chapter?`, placeholder: "e.g. Unlimited confidence, a GPS that actually works" },
       ];
 
     case "new-baby":
@@ -109,6 +127,8 @@ const getQuestions = (occasion: string, birthdayType: string, name: string): Que
         { field: "hilariousMoment", label: `Share a funny pregnancy or parenting moment`, placeholder: "e.g. Dad fainted during the ultrasound", multiline: true },
         { field: "bestFriends", label: `What are the parents' hopes for the baby?`, placeholder: "e.g. To be kind, curious, and always loved" },
         { field: "memorableAdventure", label: `Who's most excited about the new arrival?`, placeholder: "e.g. The grandparents — they've already bought 50 outfits" },
+        { field: "extraDetail1", label: `What does the nursery look like?`, placeholder: "e.g. Jungle theme with tiny animal plushies everywhere" },
+        { field: "extraDetail2", label: `What family traditions will the baby grow up with?`, placeholder: "e.g. Sunday family dinners, annual beach trips", multiline: true },
       ];
 
     case "bachelorette":
@@ -119,6 +139,8 @@ const getQuestions = (occasion: string, birthdayType: string, name: string): Que
         { field: "hilariousMoment", label: `Share the craziest girls' night out moment`, placeholder: "e.g. They ended up at karaoke singing until 3 AM", multiline: true },
         { field: "bestFriends", label: `Who are her ride-or-die friends?`, placeholder: "e.g. Meera, Ananya, and Kavya — the squad since college" },
         { field: "memorableAdventure", label: `What's the bride's guilty pleasure?`, placeholder: "e.g. Reality TV and midnight ice cream runs" },
+        { field: "extraDetail1", label: `What's the funniest thing about her relationship?`, placeholder: "e.g. They have a dedicated meme chat with 10,000+ messages" },
+        { field: "extraDetail2", label: `What advice would her friends give the groom?`, placeholder: "e.g. Never touch the thermostat, always agree on food choices", multiline: true },
       ];
 
     case "birthday":
@@ -130,9 +152,10 @@ const getQuestions = (occasion: string, birthdayType: string, name: string): Que
           { field: "favoriteTreats", label: `What are ${ns} favorite treats?`, placeholder: "e.g. Peanut butter, chicken treats, cheese" },
           { field: "sleepHabits", label: `Where and how does ${n} sleep?`, placeholder: "e.g. On the couch, curled up in a ball, steals the bed" },
           { field: "memorableAdventure", label: `What's ${ns} most memorable adventure?`, placeholder: "e.g. The time they escaped the yard and came back with a stick twice their size" },
+          { field: "extraDetail1", label: `What's ${ns} relationship with other pets or family members?`, placeholder: "e.g. Best friends with the cat, scared of the vacuum" },
+          { field: "extraDetail2", label: `What makes ${n} the best pet ever?`, placeholder: "e.g. Always knows when you're sad and comes to cuddle", multiline: true },
         ];
       }
-      // human birthday - falls through to default
       return [
         { field: "personality", label: `How would you describe ${ns} personality?`, placeholder: "e.g. Funny, adventurous, always smiling" },
         { field: "funnyQuirks", label: `What are ${ns} funniest quirks or habits?`, placeholder: "e.g. Always loses their keys, sings in the shower" },
@@ -140,6 +163,8 @@ const getQuestions = (occasion: string, birthdayType: string, name: string): Que
         { field: "hilariousMoment", label: `Share a hilarious moment with ${n}`, placeholder: "e.g. That time they tried to cook and set off the fire alarm", multiline: true },
         { field: "bestFriends", label: `Who are ${ns} best friends?`, placeholder: "e.g. Jake, Sarah, and their dog Bruno" },
         { field: "memorableAdventure", label: `What's ${ns} most memorable adventure?`, placeholder: "e.g. Road trip to Goa, camping in the mountains" },
+        { field: "extraDetail1", label: `What's ${ns} dream birthday wish?`, placeholder: "e.g. A surprise party, skydiving, a trip to Bali" },
+        { field: "extraDetail2", label: `What's one thing about ${n} that always makes people smile?`, placeholder: "e.g. Their infectious laugh, the way they tell stories", multiline: true },
       ];
 
     case "just-because":
@@ -151,6 +176,8 @@ const getQuestions = (occasion: string, birthdayType: string, name: string): Que
         { field: "hilariousMoment", label: `Share a favorite memory with ${n}`, placeholder: "e.g. That spontaneous road trip you took together", multiline: true },
         { field: "bestFriends", label: `Who are ${ns} closest people?`, placeholder: "e.g. Jake, Sarah, and their dog Bruno" },
         { field: "memorableAdventure", label: `What makes ${n} special?`, placeholder: "e.g. Their ability to make everyone laugh" },
+        { field: "extraDetail1", label: `What's a secret talent or hidden skill ${n} has?`, placeholder: "e.g. Can solve a Rubik's cube in under a minute" },
+        { field: "extraDetail2", label: `If ${n} could live in any fictional world, which would it be?`, placeholder: "e.g. Hogwarts, Middle Earth, the Marvel universe" },
       ];
   }
 };
