@@ -399,6 +399,9 @@ const CreateBook = () => {
                     favoriteTreats: form.favoriteTreats,
                     sleepHabits: form.sleepHabits,
                     memorableAdventure: form.memorableAdventure,
+                    extraDetail1: form.extraDetail1,
+                    extraDetail2: form.extraDetail2,
+                    extraDetail3: form.extraDetail3,
                   }}
                   onUpdate={(field, value) => setForm({ ...form, [field]: value })}
                 />
