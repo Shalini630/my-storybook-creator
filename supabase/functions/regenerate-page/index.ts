@@ -12,8 +12,10 @@ Deno.serve(async (req) => {
   }
 
   try {
+    const OPENAI_API_KEY = Deno.env.get("OPENAI_API_KEY");
+    if (!OPENAI_API_KEY) throw new Error("OPENAI_API_KEY not configured");
     const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
+    if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured (needed for image generation)");
 
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
@@ -78,11 +80,11 @@ Deno.serve(async (req) => {
         ? `Rewrite page ${pageNum} of a children's storybook for a ${order.gender || "child"} named ${order.name}, aged ${order.age || "5-7"}. Theme: ${order.theme}. Tone: ${order.tone || "Adventurous"}. The book title is "${story.title}". Context from other pages: ${story.pages.filter((_: any, i: number) => i !== pageIndex).map((p: any) => p.text).join(" ")}. Write a fresh, different version of page ${pageNum}. Return JSON: {"text":"string","illustrationPrompt":"string"}`
         : `Rewrite page ${pageNum} of a storybook for an adult named ${order.name}. Genre: ${order.theme}. Tone: ${order.tone || "Heartfelt"}. The book title is "${story.title}". Context: ${story.pages.filter((_: any, i: number) => i !== pageIndex).map((p: any) => p.text).join(" ")}. Write a fresh, different version. Return JSON: {"text":"string","illustrationPrompt":"string"}`;
 
-      const textRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      const textRes = await fetch("https://api.openai.com/v1/chat/completions", {
         method: "POST",
-        headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+        headers: { Authorization: `Bearer ${OPENAI_API_KEY}`, "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "google/gemini-2.5-flash",
+          model: "gpt-4o",
           messages: [
             { role: "system", content: "You are a creative book author. Respond with valid JSON only." },
             { role: "user", content: regenPrompt },
@@ -159,11 +161,11 @@ Deno.serve(async (req) => {
       ? `Create a personalized children's storybook for a ${order.gender || "child"} named ${order.name}, aged ${order.age || "5-7"}. Theme: ${order.theme}. Tone: ${order.tone || "Adventurous"}. ${order.interests ? `Loves: ${order.interests}` : ""} ${order.personal_message ? `Details: ${order.personal_message}` : ""} ${order.dedication ? `Dedication: ${order.dedication}` : ""} Create exactly 8 pages. Each page: pageNumber, short paragraph (3-5 sentences, age-appropriate), vivid illustration description. Return JSON: {"title":"string","pages":[{"pageNumber":1,"text":"string","illustrationPrompt":"string"}]}`
       : `Create a personalized storybook for an adult named ${order.name}. Genre: ${order.theme}. Tone: ${order.tone || "Heartfelt"}. ${order.relationship ? `Relationship: ${order.relationship}` : ""} ${order.personal_message ? `Details: ${order.personal_message}` : ""} ${order.dedication ? `Dedication: ${order.dedication}` : ""} Create exactly 8 pages. Each page: pageNumber, engaging paragraph (4-6 sentences), vivid illustration description. Return JSON: {"title":"string","pages":[{"pageNumber":1,"text":"string","illustrationPrompt":"string"}]}`;
 
-    const storyRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    const storyRes = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
-      headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
+      headers: { Authorization: `Bearer ${OPENAI_API_KEY}`, "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "gpt-4o",
         messages: [
           { role: "system", content: "You are a creative book author. Respond with valid JSON only, no markdown." },
           { role: "user", content: storyPrompt },
