@@ -6,6 +6,62 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
+const GEMINI_TIMEOUT_MS = 30000; // 30s timeout for Gemini
+
+async function callTextAI(
+  messages: Array<{ role: string; content: string }>,
+  tools: any[],
+  toolChoice: any,
+  lovableKey: string,
+  openaiKey: string,
+): Promise<any> {
+  // Try Gemini first (free)
+  try {
+    console.log("Attempting Gemini (Lovable AI Gateway)...");
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), GEMINI_TIMEOUT_MS);
+
+    const geminiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${lovableKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ model: "google/gemini-2.5-flash", messages, tools, tool_choice: toolChoice }),
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+
+    if (geminiRes.ok) {
+      const data = await geminiRes.json();
+      const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+      if (toolCall?.function?.arguments) {
+        console.log("✅ Gemini succeeded");
+        return data;
+      }
+      console.warn("Gemini returned empty tool call, falling back to OpenAI");
+    } else {
+      const errText = await geminiRes.text();
+      console.warn("Gemini failed:", geminiRes.status, errText);
+    }
+  } catch (err) {
+    console.warn("Gemini error (timeout or network):", err instanceof Error ? err.message : err);
+  }
+
+  // Fallback to OpenAI
+  console.log("Falling back to OpenAI (gpt-4o-mini)...");
+  const openaiRes = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${openaiKey}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ model: "gpt-4o-mini", messages, tools, tool_choice: toolChoice }),
+  });
+
+  if (!openaiRes.ok) {
+    const errText = await openaiRes.text();
+    throw new Error(`OpenAI fallback also failed: ${openaiRes.status} ${errText}`);
+  }
+
+  console.log("✅ OpenAI fallback succeeded");
+  return openaiRes.json();
+}
+
 function buildChildPrompt(order: any): string {
   const name = order.name;
   const age = order.age || "5-7";
@@ -342,60 +398,54 @@ Deno.serve(async (req) => {
 
     console.log("Generating story for order:", orderId, "audience:", order.audience);
 
-    const storyResponse = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${OPENAI_API_KEY}`,
-        "Content-Type": "application/json",
+    const storyTools = [{
+      type: "function",
+      function: {
+        name: "create_story",
+        description: "Create a personalized 24-page storybook",
+        parameters: {
+          type: "object",
+          properties: {
+            title: { type: "string" },
+            pages: {
+              type: "array",
+              items: {
+                type: "object",
+                properties: {
+                  pageNumber: { type: "number" },
+                  pageType: { type: "string", enum: ["cover", "dedication", "song", "intro", "character", "beginning", "memories", "fun", "growth", "appreciation", "emotional-peak", "future", "letter", "metaphor", "final-message", "back"] },
+                  text: { type: "string" },
+                  illustrationPrompt: { type: "string" },
+                },
+                required: ["pageNumber", "text", "illustrationPrompt"],
+              },
+            },
+          },
+          required: ["title", "pages"],
+        },
       },
-      body: JSON.stringify({
-        model: "gpt-4o",
-        messages: [
+    }];
+
+    let storyData;
+    try {
+      storyData = await callTextAI(
+        [
           { role: "system", content: "You are a professional book author. Return structured JSON only." },
           { role: "user", content: bookPrompt },
         ],
-        tools: [{
-          type: "function",
-          function: {
-            name: "create_story",
-            description: "Create a personalized 24-page storybook",
-            parameters: {
-              type: "object",
-              properties: {
-                title: { type: "string" },
-                pages: {
-                  type: "array",
-                  items: {
-                    type: "object",
-                    properties: {
-                      pageNumber: { type: "number" },
-                      pageType: { type: "string", enum: ["cover", "dedication", "song", "intro", "character", "beginning", "memories", "fun", "growth", "appreciation", "emotional-peak", "future", "letter", "metaphor", "final-message", "back"] },
-                      text: { type: "string" },
-                      illustrationPrompt: { type: "string" },
-                    },
-                    required: ["pageNumber", "text", "illustrationPrompt"],
-                  },
-                },
-              },
-              required: ["title", "pages"],
-            },
-          },
-        }],
-        tool_choice: { type: "function", function: { name: "create_story" } },
-      }),
-    });
-
-    if (!storyResponse.ok) {
-      const errText = await storyResponse.text();
-      console.error("AI story error:", storyResponse.status, errText);
+        storyTools,
+        { type: "function", function: { name: "create_story" } },
+        LOVABLE_API_KEY,
+        OPENAI_API_KEY,
+      );
+    } catch (err) {
+      console.error("All AI providers failed:", err);
       await adminClient.from("orders").update({ status: "failed" }).eq("id", orderId);
       return new Response(JSON.stringify({ error: "Failed to generate story" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
-
-    const storyData = await storyResponse.json();
     const toolCall = storyData.choices?.[0]?.message?.tool_calls?.[0];
     let story;
     try {
