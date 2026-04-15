@@ -7,6 +7,7 @@ const corsHeaders = {
 };
 
 const GEMINI_TIMEOUT_MS = 30000;
+const IMAGE_TIMEOUT_MS = 45000;
 
 async function callTextAI(
   messages: Array<{ role: string; content: string }>,
@@ -32,7 +33,7 @@ async function callTextAI(
       const data = await geminiRes.json();
       const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
       if (toolCall?.function?.arguments) {
-        console.log("✅ Gemini succeeded");
+        console.log("✅ Gemini text succeeded");
         return data;
       }
       console.warn("Gemini returned empty tool call, falling back to OpenAI");
@@ -41,7 +42,7 @@ async function callTextAI(
       console.warn("Gemini failed:", geminiRes.status, errText);
     }
   } catch (err) {
-    console.warn("Gemini error (timeout or network):", err instanceof Error ? err.message : err);
+    console.warn("Gemini error:", err instanceof Error ? err.message : err);
   }
 
   console.log("Falling back to OpenAI (gpt-4o-mini)...");
@@ -56,8 +57,67 @@ async function callTextAI(
     throw new Error(`OpenAI fallback also failed: ${openaiRes.status} ${errText}`);
   }
 
-  console.log("✅ OpenAI fallback succeeded");
+  console.log("✅ OpenAI text fallback succeeded");
   return openaiRes.json();
+}
+
+async function generateImage(
+  prompt: string,
+  lovableKey: string,
+  openaiKey: string,
+): Promise<string> {
+  try {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), IMAGE_TIMEOUT_MS);
+
+    const geminiRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${lovableKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "google/gemini-3.1-flash-image-preview",
+        messages: [{ role: "user", content: prompt }],
+        modalities: ["image", "text"],
+      }),
+      signal: controller.signal,
+    });
+    clearTimeout(timeout);
+
+    if (geminiRes.ok) {
+      const data = await geminiRes.json();
+      const url = data.choices?.[0]?.message?.images?.[0]?.image_url?.url;
+      if (url) return url;
+    }
+  } catch (err) {
+    console.warn("Gemini image error:", err instanceof Error ? err.message : err);
+  }
+
+  try {
+    console.log("Falling back to DALL-E for image...");
+    const dalleRes = await fetch("https://api.openai.com/v1/images/generations", {
+      method: "POST",
+      headers: { Authorization: `Bearer ${openaiKey}`, "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "dall-e-3",
+        prompt: prompt,
+        n: 1,
+        size: "1024x1024",
+        quality: "standard",
+      }),
+    });
+
+    if (dalleRes.ok) {
+      const data = await dalleRes.json();
+      const url = data.data?.[0]?.url;
+      if (url) {
+        console.log("✅ DALL-E fallback succeeded");
+        return url;
+      }
+    }
+  } catch (err) {
+    console.warn("DALL-E error:", err instanceof Error ? err.message : err);
+  }
+
+  return "";
 }
 
 Deno.serve(async (req) => {
@@ -123,14 +183,18 @@ Deno.serve(async (req) => {
       });
     }
 
+    const isKid = order.audience === "kid";
     const story = order.story_content as any;
     const illustrations = (order.illustrations as string[]) || [];
 
+    // --- SINGLE PAGE REGENERATION ---
     if (mode === "page" && typeof pageIndex === "number" && story) {
       const pageNum = pageIndex + 1;
-      const regenPrompt = order.audience === "kid"
-        ? `Rewrite page ${pageNum} of a children's storybook for a ${order.gender || "child"} named ${order.name}, aged ${order.age || "5-7"}. Theme: ${order.theme}. Tone: ${order.tone || "Adventurous"}. The book title is "${story.title}". Context from other pages: ${story.pages.filter((_: any, i: number) => i !== pageIndex).map((p: any) => p.text).join(" ")}. Write a fresh, different version of page ${pageNum}. Return JSON: {"text":"string","illustrationPrompt":"string"}`
-        : `Rewrite page ${pageNum} of a storybook for an adult named ${order.name}. Genre: ${order.theme}. Tone: ${order.tone || "Heartfelt"}. The book title is "${story.title}". Context: ${story.pages.filter((_: any, i: number) => i !== pageIndex).map((p: any) => p.text).join(" ")}. Write a fresh, different version. Return JSON: {"text":"string","illustrationPrompt":"string"}`;
+      const contextPages = story.pages.filter((_: any, i: number) => i !== pageIndex).map((p: any) => p.text).join(" ");
+
+      const regenPrompt = isKid
+        ? `Rewrite page ${pageNum} of a children's storybook for a ${order.gender || "child"} named ${order.name}, aged ${order.age || "5-7"}. Theme: ${order.theme}. Tone: ${order.tone || "Adventurous"}. The book title is "${story.title}". Context from other pages: ${contextPages}. Write a fresh, different version of page ${pageNum}.`
+        : `Rewrite page ${pageNum} of a literary, emotionally sophisticated book about ${order.name}. Genre: ${order.theme}. Tone: ${order.tone || "Heartfelt"}. The book title is "${story.title}". Context from other pages: ${contextPages}. Write a fresh, different version with rich prose, sensory detail, and emotional depth. This is a MATURE novel-style book, NOT a children's story. Write 5-8 sentences of literary quality.`;
 
       const rewriteTools = [{
         type: "function",
@@ -150,7 +214,7 @@ Deno.serve(async (req) => {
 
       const textData = await callTextAI(
         [
-          { role: "system", content: "You are a creative book author. Respond with valid JSON only." },
+          { role: "system", content: isKid ? "You are a creative children's book author." : "You are a literary author writing mature, emotionally sophisticated prose." },
           { role: "user", content: regenPrompt },
         ],
         rewriteTools,
@@ -162,22 +226,14 @@ Deno.serve(async (req) => {
       const toolCall = textData.choices?.[0]?.message?.tool_calls?.[0];
       const newPage = JSON.parse(toolCall.function.arguments);
 
-      // Generate new illustration (stays on Lovable AI Gateway)
-      const imgRes = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "google/gemini-3.1-flash-image-preview",
-          messages: [{ role: "user", content: `Create a beautiful ${order.audience === "kid" ? "children's book" : "storybook"} illustration: ${newPage.illustrationPrompt}. Style: colorful, whimsical, high quality. No text.` }],
-          modalities: ["image", "text"],
-        }),
-      });
-
-      let newImgUrl = "";
-      if (imgRes.ok) {
-        const imgData = await imgRes.json();
-        newImgUrl = imgData.choices?.[0]?.message?.images?.[0]?.image_url?.url || "";
-      }
+      const style = isKid
+        ? "Children's book illustration. Colorful, whimsical, magical. No text."
+        : "Elegant, cinematic, painterly book illustration. Sophisticated, atmospheric. No text.";
+      const newImgUrl = await generateImage(
+        `Create a beautiful illustration: ${newPage.illustrationPrompt}. Style: ${style}`,
+        LOVABLE_API_KEY,
+        OPENAI_API_KEY,
+      );
 
       const updatedPages = [...story.pages];
       updatedPages[pageIndex] = { pageNumber: pageNum, text: newPage.text, illustrationPrompt: newPage.illustrationPrompt };
@@ -196,18 +252,20 @@ Deno.serve(async (req) => {
       }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Full regeneration
+    // --- FULL REGENERATION ---
     await adminClient.from("orders").update({ status: "generating" }).eq("id", orderId);
 
-    const storyPrompt = order.audience === "kid"
-      ? `Create a personalized children's storybook for a ${order.gender || "child"} named ${order.name}, aged ${order.age || "5-7"}. Theme: ${order.theme}. Tone: ${order.tone || "Adventurous"}. ${order.interests ? `Loves: ${order.interests}` : ""} ${order.personal_message ? `Details: ${order.personal_message}` : ""} ${order.dedication ? `Dedication: ${order.dedication}` : ""} Create exactly 8 pages. Each page: pageNumber, short paragraph (3-5 sentences, age-appropriate), vivid illustration description. Return JSON: {"title":"string","pages":[{"pageNumber":1,"text":"string","illustrationPrompt":"string"}]}`
-      : `Create a personalized storybook for an adult named ${order.name}. Genre: ${order.theme}. Tone: ${order.tone || "Heartfelt"}. ${order.relationship ? `Relationship: ${order.relationship}` : ""} ${order.personal_message ? `Details: ${order.personal_message}` : ""} ${order.dedication ? `Dedication: ${order.dedication}` : ""} Create exactly 8 pages. Each page: pageNumber, engaging paragraph (4-6 sentences), vivid illustration description. Return JSON: {"title":"string","pages":[{"pageNumber":1,"text":"string","illustrationPrompt":"string"}]}`;
+    const storyPrompt = isKid
+      ? `Create a personalized children's storybook for a ${order.gender || "child"} named ${order.name}, aged ${order.age || "5-7"}. Theme: ${order.theme}. Tone: ${order.tone || "Adventurous"}. ${order.interests ? `Loves: ${order.interests}` : ""} ${order.personal_message ? `Details: ${order.personal_message}` : ""} ${order.dedication ? `Dedication: ${order.dedication}` : ""} Create exactly 24 pages. Each page: pageNumber, short paragraph (3-5 sentences, age-appropriate), vivid illustration description.`
+      : `Create a deeply personal, literary-quality book about ${order.name}. Genre: ${order.theme}. Tone: ${order.tone || "Heartfelt"}. ${order.relationship ? `Relationship: ${order.relationship}` : ""} ${order.personal_message ? `Personal details: ${order.personal_message}` : ""} ${order.dedication ? `Dedication: ${order.dedication}` : ""} ${order.interests ? `Interests: ${order.interests}` : ""} ${order.favorite_memory ? `Key memory: ${order.favorite_memory}` : ""}
+
+Write exactly 24 pages of mature, novel-quality prose. Each page should have 5-8 sentences of rich, emotionally sophisticated writing. This is NOT a children's book — write like a published author creating a literary gift book. Use sensory details, metaphor, vulnerability, and specific personal details to make it deeply moving.`;
 
     const storyTools = [{
       type: "function",
       function: {
         name: "create_story",
-        description: "Create a personalized storybook",
+        description: "Create a personalized 24-page book",
         parameters: {
           type: "object",
           properties: {
@@ -223,7 +281,7 @@ Deno.serve(async (req) => {
     try {
       storyData = await callTextAI(
         [
-          { role: "system", content: "You are a creative book author. Respond with valid JSON only, no markdown." },
+          { role: "system", content: isKid ? "You are a professional children's book author." : "You are a literary author writing with emotional depth and beautiful prose. This is a mature, sophisticated book — NOT a children's story." },
           { role: "user", content: storyPrompt },
         ],
         storyTools,
@@ -240,19 +298,25 @@ Deno.serve(async (req) => {
 
     const newStory = JSON.parse(storyData.choices?.[0]?.message?.tool_calls?.[0].function.arguments);
 
-    const imgPromises = newStory.pages.map((page: any) =>
-      fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: "google/gemini-3.1-flash-image-preview",
-          messages: [{ role: "user", content: `Create a beautiful ${order.audience === "kid" ? "children's book" : "storybook"} illustration: ${page.illustrationPrompt}. Style: colorful, whimsical, high quality. No text.` }],
-          modalities: ["image", "text"],
-        }),
-      }).then(async r => r.ok ? (await r.json()).choices?.[0]?.message?.images?.[0]?.image_url?.url || "" : "").catch(() => "")
-    );
-
-    const newIllustrations = await Promise.all(imgPromises);
+    // Generate images with fallback
+    const batchSize = 4;
+    const newIllustrations: string[] = [];
+    for (let i = 0; i < newStory.pages.length; i += batchSize) {
+      const batch = newStory.pages.slice(i, i + batchSize);
+      const batchResults = await Promise.all(
+        batch.map((page: any) => {
+          const style = isKid
+            ? "Children's book illustration. Colorful, whimsical, magical. No text."
+            : "Elegant, cinematic, painterly book illustration. Sophisticated, atmospheric. No text.";
+          return generateImage(
+            `Create a beautiful illustration: ${page.illustrationPrompt}. Style: ${style}`,
+            LOVABLE_API_KEY,
+            OPENAI_API_KEY,
+          );
+        })
+      );
+      newIllustrations.push(...batchResults);
+    }
 
     await adminClient.from("orders").update({
       status: "preview",
