@@ -120,6 +120,127 @@ async function generateImage(
   return "";
 }
 
+function getIllustrationStyle(isKid: boolean): string {
+  return isKid
+    ? "Children's book illustration. Colorful, whimsical, magical, high quality. No text in the image."
+    : "Elegant, sophisticated book illustration. Rich, cinematic, painterly style like a premium novel cover. Warm tones, atmospheric lighting. No text in the image.";
+}
+
+function buildAdultSinglePagePrompt(order: any, pageIndex: number, contextPages: string): string {
+  const pageNum = pageIndex + 1;
+  const name = order.name;
+  const theme = order.theme;
+  const tone = order.tone || "Heartfelt";
+  const details = order.personal_message || "";
+  const memory = order.favorite_memory || "";
+  const interests = order.interests || "";
+  const relationship = order.relationship || "";
+
+  return `You are a literary author writing with the emotional depth of Khaled Hosseini and the wit of David Sedaris.
+
+Rewrite page ${pageNum} of a deeply personal, literary-quality book about ${name}.
+
+CRITICAL STYLE RULES:
+- Write like a published author, NOT a children's book writer
+- Use rich, sensory prose — show, don't tell
+- Every sentence should carry weight — no filler, no fluff
+- Use metaphor and imagery, grounded and authentic
+- This should feel like literature, not a greeting card
+- NO childish language, NO fairy tale tone, NO "once upon a time"
+- 5-8 sentences of substantial, novel-quality prose
+
+INPUT:
+- Name: ${name}
+- Genre/Theme: ${theme}
+- Tone: ${tone}
+- Relationship: ${relationship}
+${details ? `- Personal Details: ${details}` : ""}
+${interests ? `- Interests: ${interests}` : ""}
+${memory ? `- Key Memory: ${memory}` : ""}
+
+Context from other pages (maintain continuity but write a FRESH, DIFFERENT version):
+${contextPages}
+
+Write a completely new version of page ${pageNum}. Make it emotionally sophisticated, mature, and literary.`;
+}
+
+function buildAdultFullRegenPrompt(order: any): string {
+  const name = order.name;
+  const theme = order.theme;
+  const tone = order.tone || "Heartfelt";
+  const dedication = order.dedication || "";
+  const relationship = order.relationship || "";
+  const details = order.personal_message || "";
+  const memory = order.favorite_memory || "";
+  const interests = order.interests || "";
+
+  const extract = (key: string) => {
+    const match = details.match(new RegExp(`${key}:\\s*([^.]+)`));
+    return match ? match[1].trim() : "";
+  };
+
+  const personality = extract("Personality");
+  const quirks = extract("Quirks");
+  const favoriteThings = extract("Favorite things");
+  const funnyMoment = extract("Funny moment");
+  const occasion = extract("Occasion") || "Birthday";
+
+  return `You are a literary author writing a deeply personal, beautifully crafted book. This is NOT a children's book or a fairy tale. This is a mature, emotionally sophisticated piece of writing — think of it as a short novel, a memoir, or a collection of literary essays about a real person.
+
+CRITICAL STYLE RULES:
+- Write like a published author, not a greeting card
+- Use rich, sensory prose — show, don't tell
+- Every sentence should carry weight — no filler, no fluff
+- Vary sentence structure: short punches, flowing passages, fragments for impact
+- Use metaphor and imagery, but keep it grounded and authentic
+- Include specific details woven naturally into the narrative
+- This should feel like literature, not a template
+- NO childish language, NO fairy tale tone, NO "once upon a time"
+- Think: The writing quality of a Khaled Hosseini dedication meets a John Green love letter
+
+INPUT:
+- Name: ${name}
+- Occasion: ${occasion}
+- Theme: ${theme}
+- Tone: ${tone}
+- Relationship: ${relationship}
+${dedication ? `- Dedication: ${dedication}` : ""}
+${personality ? `- Personality: ${personality}` : ""}
+${quirks ? `- Quirks: ${quirks}` : ""}
+${favoriteThings ? `- Favorite things: ${favoriteThings}` : ""}
+${funnyMoment ? `- Funny moment: ${funnyMoment}` : ""}
+${details ? `- Personal Details: ${details}` : ""}
+${interests ? `- Interests: ${interests}` : ""}
+${memory ? `- Key Memory: ${memory}` : ""}
+
+BOOK STRUCTURE (EXACTLY 24 pages):
+Page 1: COVER — A compelling title featuring ${name}. Not cutesy — think book-jacket worthy.
+Page 2: DEDICATION — "For ${name}," — ${dedication || "a line that stops them breathing for a second"}. Like the opening line of a novel.
+Page 3: PRELUDE — An evocative opening moment. Include "[QR CODE HERE]" placeholder.
+Page 4: CHAPTER ONE — Hook the reader. Set the emotional landscape with authority and intimacy.
+Pages 5-6: PORTRAIT — Paint ${name} like a novelist writes a protagonist — through specific details, gestures, contradictions.
+Pages 7-8: EVOLUTION — The chapters of their life. Not a timeline — a transformation.
+Pages 9-10: MOMENTS — Specific memories rendered in vivid detail. Write scenes, not summaries.
+Pages 11-12: THE MESS — Quirks, contradictions, infuriating and lovable in equal measure.
+Pages 13-14: IMPACT — How knowing them has changed the world around them.
+Pages 15-16: WHAT SHOULD NEVER CHANGE — The non-negotiable parts of who they are.
+Pages 17-18: THE UNSAID — What you've been meaning to say. Without armor.
+Pages 19-20: NEXT CHAPTER — Specific, personal hopes for their future.
+Page 21: THE LETTER — "Dear ${name}," — Raw, unfiltered, from the gut.
+Page 22: IF YOU WERE A STORY — Literary metaphors. Specific and surprising.
+Page 23: THE LAST LINE — One powerful closing paragraph. Makes someone close the book slowly.
+Page 24: COLOPHON — "Made with ❤️ by KahaaniSeKitab"
+
+WRITING RULES:
+- This is PROSE, not poetry. Write in flowing paragraphs.
+- Each page should read like a chapter of a beautiful short novel
+- 5-8 sentences per page — substantial, not sparse
+- Build emotional momentum: intrigue → warmth → depth → vulnerability → catharsis → hope
+- Use personal details to make it SPECIFIC — generic sentiment is the enemy
+
+Generate ALL 24 pages.`;
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return new Response("ok", { headers: corsHeaders });
@@ -186,15 +307,18 @@ Deno.serve(async (req) => {
     const isKid = order.audience === "kid";
     const story = order.story_content as any;
     const illustrations = (order.illustrations as string[]) || [];
+    const style = getIllustrationStyle(isKid);
 
     // --- SINGLE PAGE REGENERATION ---
     if (mode === "page" && typeof pageIndex === "number" && story) {
-      const pageNum = pageIndex + 1;
-      const contextPages = story.pages.filter((_: any, i: number) => i !== pageIndex).map((p: any) => p.text).join(" ");
+      const contextPages = story.pages
+        .filter((_: any, i: number) => i !== pageIndex)
+        .map((p: any) => p.text)
+        .join(" ");
 
       const regenPrompt = isKid
-        ? `Rewrite page ${pageNum} of a children's storybook for a ${order.gender || "child"} named ${order.name}, aged ${order.age || "5-7"}. Theme: ${order.theme}. Tone: ${order.tone || "Adventurous"}. The book title is "${story.title}". Context from other pages: ${contextPages}. Write a fresh, different version of page ${pageNum}.`
-        : `Rewrite page ${pageNum} of a literary, emotionally sophisticated book about ${order.name}. Genre: ${order.theme}. Tone: ${order.tone || "Heartfelt"}. The book title is "${story.title}". Context from other pages: ${contextPages}. Write a fresh, different version with rich prose, sensory detail, and emotional depth. This is a MATURE novel-style book, NOT a children's story. Write 5-8 sentences of literary quality.`;
+        ? `Rewrite page ${pageIndex + 1} of a children's storybook for a ${order.gender || "child"} named ${order.name}, aged ${order.age || "5-7"}. Theme: ${order.theme}. Tone: ${order.tone || "Adventurous"}. The book title is "${story.title}". Context from other pages: ${contextPages}. Write a fresh, different version of page ${pageIndex + 1}. 3-5 sentences, age-appropriate, vivid and magical.`
+        : buildAdultSinglePagePrompt(order, pageIndex, contextPages);
 
       const rewriteTools = [{
         type: "function",
@@ -214,7 +338,7 @@ Deno.serve(async (req) => {
 
       const textData = await callTextAI(
         [
-          { role: "system", content: isKid ? "You are a creative children's book author." : "You are a literary author writing mature, emotionally sophisticated prose." },
+          { role: "system", content: isKid ? "You are a creative children's book author." : "You are a literary author who writes with the emotional depth of Khaled Hosseini and the wit of David Sedaris. Write mature, emotionally sophisticated prose. This is NOT a children's book." },
           { role: "user", content: regenPrompt },
         ],
         rewriteTools,
@@ -226,9 +350,6 @@ Deno.serve(async (req) => {
       const toolCall = textData.choices?.[0]?.message?.tool_calls?.[0];
       const newPage = JSON.parse(toolCall.function.arguments);
 
-      const style = isKid
-        ? "Children's book illustration. Colorful, whimsical, magical. No text."
-        : "Elegant, cinematic, painterly book illustration. Sophisticated, atmospheric. No text.";
       const newImgUrl = await generateImage(
         `Create a beautiful illustration: ${newPage.illustrationPrompt}. Style: ${style}`,
         LOVABLE_API_KEY,
@@ -236,7 +357,7 @@ Deno.serve(async (req) => {
       );
 
       const updatedPages = [...story.pages];
-      updatedPages[pageIndex] = { pageNumber: pageNum, text: newPage.text, illustrationPrompt: newPage.illustrationPrompt };
+      updatedPages[pageIndex] = { pageNumber: pageIndex + 1, text: newPage.text, illustrationPrompt: newPage.illustrationPrompt };
       const updatedIllustrations = [...illustrations];
       updatedIllustrations[pageIndex] = newImgUrl || illustrations[pageIndex] || "";
 
@@ -257,9 +378,7 @@ Deno.serve(async (req) => {
 
     const storyPrompt = isKid
       ? `Create a personalized children's storybook for a ${order.gender || "child"} named ${order.name}, aged ${order.age || "5-7"}. Theme: ${order.theme}. Tone: ${order.tone || "Adventurous"}. ${order.interests ? `Loves: ${order.interests}` : ""} ${order.personal_message ? `Details: ${order.personal_message}` : ""} ${order.dedication ? `Dedication: ${order.dedication}` : ""} Create exactly 24 pages. Each page: pageNumber, short paragraph (3-5 sentences, age-appropriate), vivid illustration description.`
-      : `Create a deeply personal, literary-quality book about ${order.name}. Genre: ${order.theme}. Tone: ${order.tone || "Heartfelt"}. ${order.relationship ? `Relationship: ${order.relationship}` : ""} ${order.personal_message ? `Personal details: ${order.personal_message}` : ""} ${order.dedication ? `Dedication: ${order.dedication}` : ""} ${order.interests ? `Interests: ${order.interests}` : ""} ${order.favorite_memory ? `Key memory: ${order.favorite_memory}` : ""}
-
-Write exactly 24 pages of mature, novel-quality prose. Each page should have 5-8 sentences of rich, emotionally sophisticated writing. This is NOT a children's book — write like a published author creating a literary gift book. Use sensory details, metaphor, vulnerability, and specific personal details to make it deeply moving.`;
+      : buildAdultFullRegenPrompt(order);
 
     const storyTools = [{
       type: "function",
@@ -281,7 +400,7 @@ Write exactly 24 pages of mature, novel-quality prose. Each page should have 5-8
     try {
       storyData = await callTextAI(
         [
-          { role: "system", content: isKid ? "You are a professional children's book author." : "You are a literary author writing with emotional depth and beautiful prose. This is a mature, sophisticated book — NOT a children's story." },
+          { role: "system", content: isKid ? "You are a professional children's book author." : "You are a literary author who writes with the emotional depth of Khaled Hosseini and the wit of David Sedaris. This is a mature, sophisticated book — NOT a children's story." },
           { role: "user", content: storyPrompt },
         ],
         storyTools,
@@ -304,16 +423,13 @@ Write exactly 24 pages of mature, novel-quality prose. Each page should have 5-8
     for (let i = 0; i < newStory.pages.length; i += batchSize) {
       const batch = newStory.pages.slice(i, i + batchSize);
       const batchResults = await Promise.all(
-        batch.map((page: any) => {
-          const style = isKid
-            ? "Children's book illustration. Colorful, whimsical, magical. No text."
-            : "Elegant, cinematic, painterly book illustration. Sophisticated, atmospheric. No text.";
-          return generateImage(
+        batch.map((page: any) =>
+          generateImage(
             `Create a beautiful illustration: ${page.illustrationPrompt}. Style: ${style}`,
             LOVABLE_API_KEY,
             OPENAI_API_KEY,
-          );
-        })
+          )
+        )
       );
       newIllustrations.push(...batchResults);
     }
