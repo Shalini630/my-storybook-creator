@@ -487,15 +487,36 @@ const ChildStoryFlow = ({ onComplete, generating }: ChildStoryFlowProps) => {
           <motion.div key="c10" {...anim} className="space-y-6">
             <div className="text-center">
               <h2 className="mb-2 font-display text-2xl font-bold text-foreground">Final Touches ✨</h2>
-              <p className="font-body text-muted-foreground">Choose your cover and add a dedication.</p>
+              <p className="font-body text-muted-foreground">Choose your book size, cover, and add a dedication.</p>
             </div>
             <div className="space-y-4 rounded-2xl border border-border bg-card p-6">
               <div>
-                <Label className="font-body font-semibold">Cover Type</Label>
+                <Label className="font-body font-semibold">Book Size</Label>
                 <div className="mt-2 grid grid-cols-2 gap-3">
                   {[
-                    { id: "softcover" as const, label: "Softcover", price: "₹999", desc: "Lightweight & flexible" },
-                    { id: "hardcover" as const, label: "Hardcover", price: "₹1,299", desc: "Premium & durable" },
+                    { id: "40" as const, label: "📘 40 pages", price: "₹1,200" },
+                    { id: "60" as const, label: "📘 40–60 pages", price: "₹1,500" },
+                    { id: "80" as const, label: "📘 60–80 pages", price: "₹1,700" },
+                    { id: "100" as const, label: "📘 80–100 pages", price: "₹2,000" },
+                  ].map(s => (
+                    <button
+                      key={s.id}
+                      onClick={() => setForm({ ...form, bookSize: s.id })}
+                      className={`rounded-xl border-2 p-4 text-left transition-all ${form.bookSize === s.id ? "border-primary bg-primary/5 shadow-sm" : "border-border hover:border-primary/50"}`}
+                    >
+                      <p className="font-display text-sm font-bold text-foreground">{s.label}</p>
+                      <p className="font-display text-base font-bold text-primary">{s.price}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <Label className="font-body font-semibold">Cover Add-on</Label>
+                <div className="mt-2 grid grid-cols-2 gap-3">
+                  {[
+                    { id: "softcover" as const, label: "Softcover", price: "Included", desc: "Lightweight & flexible" },
+                    { id: "hardcover" as const, label: "Hardcover", price: "+ ₹200", desc: "Premium & durable" },
                   ].map(c => (
                     <button key={c.id} onClick={() => setForm({ ...form, coverType: c.id })}
                       className={`rounded-xl border-2 p-4 text-left transition-all ${form.coverType === c.id ? "border-primary bg-primary/5 shadow-sm" : "border-border hover:border-primary/50"}`}>
