@@ -119,6 +119,7 @@ const ChildStoryFlow = ({ onComplete, generating }: ChildStoryFlowProps) => {
     songName: "",
     songLink: "",
     songWhy: "",
+    bookSize: "40",
     coverType: "softcover",
     dedication: "",
   });
