@@ -45,6 +45,7 @@ export interface ChildFormData {
   songName: string;
   songLink: string;
   songWhy: string;
+  bookSize: "40" | "60" | "80" | "100";
   coverType: "softcover" | "hardcover";
   dedication: string;
 }
