@@ -68,8 +68,15 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Server-side price validation
-    const amount = order.cover_type === "hardcover" ? 129900 : 99900; // paise
+    // Server-side price validation — use dynamic price stored on the order (in INR)
+    const priceInr = Number(order.price);
+    if (!Number.isFinite(priceInr) || priceInr < 100 || priceInr > 100000) {
+      return new Response(JSON.stringify({ error: "Invalid order price" }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const amount = Math.round(priceInr * 100); // paise
 
     // Create Razorpay order
     const razorpayResponse = await fetch("https://api.razorpay.com/v1/orders", {
