@@ -550,7 +550,8 @@ const ChildStoryFlow = ({ onComplete, generating }: ChildStoryFlowProps) => {
                   {form.sidekick && <li>🐾 Sidekick: <span className="font-semibold text-foreground">{sidekickOptions.find(s => s.id === form.sidekick)?.label}</span></li>}
                   {form.goal && <li>🎯 Goal: <span className="font-semibold text-foreground">{goalOptions.find(g => g.id === form.goal)?.label}</span></li>}
                   {form.challenge && <li>⚡ Challenge: <span className="font-semibold text-foreground">{challengeOptions.find(c => c.id === form.challenge)?.label}</span></li>}
-                  <li>📕 Cover: <span className="font-semibold text-foreground">{form.coverType === "softcover" ? "Softcover — ₹999" : "Hardcover — ₹1,299"}</span></li>
+                  <li>📐 Size: <span className="font-semibold text-foreground">{form.bookSize === "40" ? "40 pages — ₹1,200" : form.bookSize === "60" ? "40–60 pages — ₹1,500" : form.bookSize === "80" ? "60–80 pages — ₹1,700" : "80–100 pages — ₹2,000"}</span></li>
+                  <li>📕 Cover: <span className="font-semibold text-foreground">{form.coverType === "softcover" ? "Softcover (included)" : "Hardcover (+ ₹200)"}</span></li>
                   {form.songName && <li>🎵 Song: <span className="font-semibold text-foreground">{form.songName}</span></li>}
                   {form.photo && <li>📷 Photo: <span className="font-semibold text-foreground">Uploaded ✓</span></li>}
                 </ul>
