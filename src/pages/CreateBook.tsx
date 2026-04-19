@@ -60,10 +60,18 @@ const occasions = [
 const kidAgeOptions = ["2-3", "4-5", "6-7", "8-10"];
 const genderOptions = ["Girl", "Boy", "Non-binary"];
 const toneOptions = ["Humorous", "Heartfelt", "Adventurous", "Inspirational", "Romantic", "Mysterious"];
-const bookSizeOptions = ["Standard (8×10)", "Compact (6×8)", "Large (10×12)"];
 
-// Steps: 0=Gift+Audience, 1=Occasion, 2=Couple?, 3=PersonInfo, 4=Personality, 5=Theme, 6=Tone&Cover, 7=Finalize
-const TOTAL_STEPS = 8;
+const bookSizeOptions = [
+  { id: "40", label: "40 pages", price: 1200, displayPrice: "₹1,200" },
+  { id: "60", label: "40–60 pages", price: 1500, displayPrice: "₹1,500" },
+  { id: "80", label: "60–80 pages", price: 1700, displayPrice: "₹1,700" },
+  { id: "100", label: "80–100 pages", price: 2000, displayPrice: "₹2,000" },
+] as const;
+
+// Adult flow steps:
+// 0=Gift+Audience, 1=Occasion, 2=Couple?, 3=PersonInfo+Photo, 4=Personality,
+// 5=Theme, 6=Tone, 7=Song(QR), 8=Memory Photos, 9=Book Size & Cover, 10=Finalize
+const TOTAL_STEPS = 11;
 
 const CreateBook = () => {
   const navigate = useNavigate();
