@@ -45,6 +45,7 @@ export interface ChildFormData {
   songName: string;
   songLink: string;
   songWhy: string;
+  bookSize: "40" | "60" | "80" | "100";
   coverType: "softcover" | "hardcover";
   dedication: string;
 }
@@ -118,6 +119,7 @@ const ChildStoryFlow = ({ onComplete, generating }: ChildStoryFlowProps) => {
     songName: "",
     songLink: "",
     songWhy: "",
+    bookSize: "40",
     coverType: "softcover",
     dedication: "",
   });
@@ -485,15 +487,36 @@ const ChildStoryFlow = ({ onComplete, generating }: ChildStoryFlowProps) => {
           <motion.div key="c10" {...anim} className="space-y-6">
             <div className="text-center">
               <h2 className="mb-2 font-display text-2xl font-bold text-foreground">Final Touches ✨</h2>
-              <p className="font-body text-muted-foreground">Choose your cover and add a dedication.</p>
+              <p className="font-body text-muted-foreground">Choose your book size, cover, and add a dedication.</p>
             </div>
             <div className="space-y-4 rounded-2xl border border-border bg-card p-6">
               <div>
-                <Label className="font-body font-semibold">Cover Type</Label>
+                <Label className="font-body font-semibold">Book Size</Label>
                 <div className="mt-2 grid grid-cols-2 gap-3">
                   {[
-                    { id: "softcover" as const, label: "Softcover", price: "₹999", desc: "Lightweight & flexible" },
-                    { id: "hardcover" as const, label: "Hardcover", price: "₹1,299", desc: "Premium & durable" },
+                    { id: "40" as const, label: "📘 40 pages", price: "₹1,200" },
+                    { id: "60" as const, label: "📘 40–60 pages", price: "₹1,500" },
+                    { id: "80" as const, label: "📘 60–80 pages", price: "₹1,700" },
+                    { id: "100" as const, label: "📘 80–100 pages", price: "₹2,000" },
+                  ].map(s => (
+                    <button
+                      key={s.id}
+                      onClick={() => setForm({ ...form, bookSize: s.id })}
+                      className={`rounded-xl border-2 p-4 text-left transition-all ${form.bookSize === s.id ? "border-primary bg-primary/5 shadow-sm" : "border-border hover:border-primary/50"}`}
+                    >
+                      <p className="font-display text-sm font-bold text-foreground">{s.label}</p>
+                      <p className="font-display text-base font-bold text-primary">{s.price}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <Label className="font-body font-semibold">Cover Add-on</Label>
+                <div className="mt-2 grid grid-cols-2 gap-3">
+                  {[
+                    { id: "softcover" as const, label: "Softcover", price: "Included", desc: "Lightweight & flexible" },
+                    { id: "hardcover" as const, label: "Hardcover", price: "+ ₹200", desc: "Premium & durable" },
                   ].map(c => (
                     <button key={c.id} onClick={() => setForm({ ...form, coverType: c.id })}
                       className={`rounded-xl border-2 p-4 text-left transition-all ${form.coverType === c.id ? "border-primary bg-primary/5 shadow-sm" : "border-border hover:border-primary/50"}`}>
@@ -527,7 +550,8 @@ const ChildStoryFlow = ({ onComplete, generating }: ChildStoryFlowProps) => {
                   {form.sidekick && <li>🐾 Sidekick: <span className="font-semibold text-foreground">{sidekickOptions.find(s => s.id === form.sidekick)?.label}</span></li>}
                   {form.goal && <li>🎯 Goal: <span className="font-semibold text-foreground">{goalOptions.find(g => g.id === form.goal)?.label}</span></li>}
                   {form.challenge && <li>⚡ Challenge: <span className="font-semibold text-foreground">{challengeOptions.find(c => c.id === form.challenge)?.label}</span></li>}
-                  <li>📕 Cover: <span className="font-semibold text-foreground">{form.coverType === "softcover" ? "Softcover — ₹999" : "Hardcover — ₹1,299"}</span></li>
+                  <li>📐 Size: <span className="font-semibold text-foreground">{form.bookSize === "40" ? "40 pages — ₹1,200" : form.bookSize === "60" ? "40–60 pages — ₹1,500" : form.bookSize === "80" ? "60–80 pages — ₹1,700" : "80–100 pages — ₹2,000"}</span></li>
+                  <li>📕 Cover: <span className="font-semibold text-foreground">{form.coverType === "softcover" ? "Softcover (included)" : "Hardcover (+ ₹200)"}</span></li>
                   {form.songName && <li>🎵 Song: <span className="font-semibold text-foreground">{form.songName}</span></li>}
                   {form.photo && <li>📷 Photo: <span className="font-semibold text-foreground">Uploaded ✓</span></li>}
                 </ul>

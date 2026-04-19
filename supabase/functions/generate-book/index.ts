@@ -495,6 +495,7 @@ Deno.serve(async (req) => {
 
     const isKid = order.audience === "kid";
     const bookPrompt = isKid ? buildChildPrompt(order) : buildAdultPrompt(order);
+    const subjectPhotoUrl: string | null = order.photo_url || null;
 
     console.log("Generating story for order:", orderId, "audience:", order.audience);
 
@@ -572,8 +573,11 @@ Deno.serve(async (req) => {
           const style = isKid
             ? "Children's book illustration. Colorful, whimsical, magical, high quality. No text in the image."
             : "Elegant, sophisticated book illustration. Rich, cinematic, painterly style like a premium novel cover. Warm tones, atmospheric lighting. No text in the image.";
+          const subjectInstruction = subjectPhotoUrl
+            ? ` IMPORTANT: The main character must clearly resemble the real person shown in this reference photo (preserve facial features, skin tone, hair, and overall likeness): ${subjectPhotoUrl}. Render them as a stylized illustrated character, not a photo.`
+            : "";
           return generateImage(
-            `Create a beautiful illustration: ${page.illustrationPrompt}. Style: ${style}`,
+            `Create a beautiful illustration featuring ${order.name} as the protagonist: ${page.illustrationPrompt}.${subjectInstruction} Style: ${style}`,
             LOVABLE_API_KEY,
             OPENAI_API_KEY,
           );
