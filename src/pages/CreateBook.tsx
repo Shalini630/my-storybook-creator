@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight, Sparkles, Upload, Loader2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Sparkles, Upload, Loader2, Music, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
@@ -107,11 +107,15 @@ const CreateBook = () => {
     extraDetail3: "",
     theme: "",
     tone: "",
-    bookSize: "",
+    bookSize: "" as "" | "40" | "60" | "80" | "100",
     coverType: "" as "" | "softcover" | "hardcover",
     dedication: "",
     photo: null as File | null,
     photoPreview: "",
+    songName: "",
+    songLink: "",
+    songWhy: "",
+    memoryPhotos: [] as { file: File; preview: string; caption: string }[],
   });
 
   const audience = form.audience;
@@ -127,7 +131,10 @@ const CreateBook = () => {
     }
     if (step === 4) return true;
     if (step === 5) return !!form.theme;
-    if (step === 6) return !!form.coverType;
+    if (step === 6) return true; // tone optional
+    if (step === 7) return true; // song optional
+    if (step === 8) return true; // memory photos optional
+    if (step === 9) return !!form.bookSize && !!form.coverType;
     return true;
   })();
 
