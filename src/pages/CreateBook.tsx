@@ -753,7 +753,21 @@ const CreateBook = () => {
                       return;
                     }
 
-                    const price = form.coverType === "hardcover" ? 1299 : 999;
+                    const sizePriceMap: Record<string, number> = { "40": 1200, "60": 1500, "80": 1700, "100": 2000 };
+                    const basePrice = sizePriceMap[form.bookSize] ?? 1200;
+                    const price = basePrice + (form.coverType === "hardcover" ? 200 : 0);
+
+                    // Upload subject photo to private storage so the AI can render their face
+                    let photoUrl: string | null = null;
+                    if (form.photo) {
+                      const ext = form.photo.name.split(".").pop() || "jpg";
+                      const path = `${user.id}/subject-${Date.now()}.${ext}`;
+                      const { error: upErr } = await supabase.storage.from("subject-photos").upload(path, form.photo, { upsert: false });
+                      if (!upErr) {
+                        const { data: signed } = await supabase.storage.from("subject-photos").createSignedUrl(path, 60 * 60 * 24 * 7);
+                        photoUrl = signed?.signedUrl ?? null;
+                      }
+                    }
 
                     const personalityDetails = [
                       form.occasion && `Occasion: ${form.occasion}`,
@@ -768,6 +782,8 @@ const CreateBook = () => {
                       form.extraDetail1 && `Extra detail: ${form.extraDetail1}`,
                       form.extraDetail2 && `Extra detail: ${form.extraDetail2}`,
                       form.extraDetail3 && `Extra detail: ${form.extraDetail3}`,
+                      form.songName && `Song: ${form.songName}${form.songWhy ? ` — ${form.songWhy}` : ""}${form.songLink ? ` (${form.songLink})` : ""}`,
+                      form.memoryPhotos.length > 0 && `Memory photo captions: ${form.memoryPhotos.map(mp => mp.caption).filter(Boolean).join(" | ")}`,
                     ].filter(Boolean).join(". ");
 
                     const { data: order, error: insertError } = await supabase
@@ -789,6 +805,7 @@ const CreateBook = () => {
                         relationship: form.relationship || null,
                         hobbies: form.hobbies || null,
                         favorite_memory: form.memorableAdventure || form.favoriteMemory || null,
+                        photo_url: photoUrl,
                         price,
                         status: "pending",
                       })
