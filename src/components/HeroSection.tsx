@@ -1,10 +1,32 @@
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { Star, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import heroChild from "@/assets/hero-child.jpg";
+import heroKid from "@/assets/hero-kid.jpg";
+import heroWoman from "@/assets/hero-woman.jpg";
+import heroCouple from "@/assets/hero-couple.jpg";
+import heroDad from "@/assets/hero-dad.jpg";
+import heroGrandma from "@/assets/hero-grandma.jpg";
+
+const heroSlides = [
+  { img: heroKid, alt: "Smiling child holding a personalized storybook with their own face illustrated inside", caption: "Your child as the hero" },
+  { img: heroWoman, alt: "Young woman holding a personalized storybook with her own portrait inside", caption: "Her, painted into every page" },
+  { img: heroCouple, alt: "Couple holding a personalized storybook with both of them illustrated inside", caption: "Your love story, illustrated" },
+  { img: heroDad, alt: "Father holding a personalized storybook with his own face illustrated inside", caption: "A book starring Dad" },
+  { img: heroGrandma, alt: "Grandmother holding a personalized storybook with her own face illustrated inside", caption: "Her life, lovingly written" },
+];
 
 const HeroSection = () => {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    const id = setInterval(() => setIndex(i => (i + 1) % heroSlides.length), 3500);
+    return () => clearInterval(id);
+  }, []);
+
+  const slide = heroSlides[index];
+
   return (
     <section className="relative overflow-hidden bg-gradient-hero py-16 md:py-24">
       {/* Decorative floating shapes */}
@@ -30,7 +52,7 @@ const HeroSection = () => {
           </h1>
 
           <p className="mb-6 max-w-lg font-body text-lg text-muted-foreground">
-            Answer a few questions, preview their story, and get a one-of-a-kind gift book delivered to your doorstep.
+            Upload their photo, answer a few questions, and we'll write — and illustrate — a one-of-a-kind book where their face appears inside the story.
           </p>
 
           <div className="mb-4 flex flex-wrap items-center gap-4">
@@ -61,24 +83,40 @@ const HeroSection = () => {
           transition={{ duration: 0.7, delay: 0.2 }}
           className="relative flex justify-center"
         >
-          <div className="relative">
-            <img
-              src={heroChild}
-              alt="Happy person holding their personalized storybook"
-              width={800}
-              height={960}
-              className="w-full max-w-md rounded-3xl shadow-book"
-            />
-            <div className="absolute -bottom-4 -left-4 rounded-2xl bg-card p-3 shadow-lg">
-              <div className="flex items-center gap-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-coral">
-                  <span className="text-sm">📖</span>
-                </div>
-                <div>
-                  <p className="font-display text-xs font-semibold text-foreground">High-Quality Print</p>
-                  <p className="font-body text-xs text-muted-foreground">Hardcover & Softcover</p>
-                </div>
+          <div className="relative w-full max-w-md">
+            <div className="relative aspect-[5/6] w-full overflow-hidden rounded-3xl shadow-book">
+              <AnimatePresence mode="wait">
+                <motion.img
+                  key={slide.img}
+                  src={slide.img}
+                  alt={slide.alt}
+                  width={800}
+                  height={960}
+                  initial={{ opacity: 0, scale: 1.04 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.98 }}
+                  transition={{ duration: 0.7 }}
+                  className="absolute inset-0 h-full w-full object-cover"
+                />
+              </AnimatePresence>
+            </div>
+
+            <div className="absolute -bottom-5 left-1/2 flex -translate-x-1/2 items-center gap-2 rounded-full bg-card/95 px-4 py-2 shadow-lg backdrop-blur">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-coral">
+                <span className="text-xs">📖</span>
               </div>
+              <p className="font-display text-xs font-semibold text-foreground">{slide.caption}</p>
+            </div>
+
+            <div className="mt-8 flex justify-center gap-1.5">
+              {heroSlides.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setIndex(i)}
+                  aria-label={`Show slide ${i + 1}`}
+                  className={`h-1.5 rounded-full transition-all ${i === index ? "w-6 bg-primary" : "w-1.5 bg-muted-foreground/30 hover:bg-muted-foreground/50"}`}
+                />
+              ))}
             </div>
           </div>
         </motion.div>
