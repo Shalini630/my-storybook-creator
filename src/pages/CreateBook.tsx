@@ -174,7 +174,21 @@ const CreateBook = () => {
         return;
       }
 
-      const price = childData.coverType === "hardcover" ? 1299 : 999;
+      const sizePriceMap: Record<string, number> = { "40": 1200, "60": 1500, "80": 1700, "100": 2000 };
+      const basePrice = sizePriceMap[childData.bookSize] ?? 1200;
+      const price = basePrice + (childData.coverType === "hardcover" ? 200 : 0);
+
+      // Upload subject photo (if any) to private storage so the AI can render their face
+      let photoUrl: string | null = null;
+      if (childData.photo) {
+        const ext = childData.photo.name.split(".").pop() || "jpg";
+        const path = `${user.id}/subject-${Date.now()}.${ext}`;
+        const { error: upErr } = await supabase.storage.from("subject-photos").upload(path, childData.photo, { upsert: false });
+        if (!upErr) {
+          const { data: signed } = await supabase.storage.from("subject-photos").createSignedUrl(path, 60 * 60 * 24 * 7);
+          photoUrl = signed?.signedUrl ?? null;
+        }
+      }
 
       const personalityDetails = [
         `Occasion: ${childData.occasion}`,
@@ -205,6 +219,7 @@ const CreateBook = () => {
           name: childData.nickname ? `${childData.name} (${childData.nickname})` : childData.name,
           theme: childData.theme,
           cover_type: childData.coverType,
+          book_size: childData.bookSize,
           dedication: childData.dedication || null,
           personal_message: personalityDetails,
           age: childData.age,
@@ -212,6 +227,7 @@ const CreateBook = () => {
           favorite_memory: childData.smileMemory || null,
           interests: childData.favoriteActivity || null,
           hobbies: childData.favoriteToy || null,
+          photo_url: photoUrl,
           price,
           status: "pending",
         })
