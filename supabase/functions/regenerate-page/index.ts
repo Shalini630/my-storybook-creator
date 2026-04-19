@@ -164,6 +164,100 @@ ${contextPages}
 Write a completely new version of page ${pageNum}. Make it emotionally sophisticated, mature, and literary.`;
 }
 
+function getOccasionArc(occasion: string): string {
+  switch (occasion) {
+    case "anniversary":
+      return `
+NARRATIVE ARC: A LOVE LETTER IN CHAPTERS
+- Pages 5-6: THE MEETING — Cinematic opening. Sensory details, not summary.
+- Pages 7-8: FALLING — The turning point. Diary-entry intimacy, sacred weight.
+- Pages 9-10: THE JOURNEY — Fights, silences, choosing each other anyway. Honest, raw beauty.
+- Pages 11-12: THE SMALL THINGS — Coffee made right, hand on the back, private language. Prose poetry.
+- Pages 13-14: TRANSFORMATION — How loving them changed you. Vulnerable.
+- Pages 15-16: WHAT YOU ARE TO ME — Their essence, explained.
+- Pages 17-18: EMOTIONAL PEAK — The 3am truths. Make it ache beautifully.
+- Pages 19-20: FOREVER — Quiet certainty, not perfection.`;
+    case "wedding":
+      return `
+NARRATIVE ARC: THE GREATEST LOVE STORY
+- Pages 5-6: BEFORE — Two separate, incomplete lives. Cinematic detail.
+- Pages 7-8: THE COLLISION — How they met, the inciting incident.
+- Pages 9-10: THE COURTSHIP — First dates, nervous laughter, walls coming down.
+- Pages 11-12: THE BECOMING — From "you and I" to "us." Inside jokes, rituals.
+- Pages 13-14: THE STORMS — Honest about conflict and the art of returning.
+- Pages 15-16: THE CERTAINTY — Why them, why forever. A closing argument.
+- Pages 17-18: THE VOW — The unspoken contract. Raw and beautiful.
+- Pages 19-20: THE BEGINNING — Chapter One of the rest. Hope and electricity.`;
+    case "mothers-day":
+      return `
+NARRATIVE ARC: A DAUGHTER/SON'S TESTIMONY
+- Pages 5-6: PORTRAIT — Her gestures, voice, way of entering a room.
+- Pages 7-8: THE EARLY DAYS — Childhood through adult eyes. Sensory nostalgia.
+- Pages 9-10: HER SACRIFICE — What she gave up that you only understand now.
+- Pages 11-12: HER STRENGTH — Flawed, fierce, unbreakable.
+- Pages 13-14: HER JOY — Her laughter, guilty pleasures, secret rebellions.
+- Pages 15-16: WHAT SHE TAUGHT — Lessons she lived, not said.
+- Pages 17-18: THE WORDS I OWE HER — Everything you've swallowed. Raw.
+- Pages 19-20: MY WISH FOR HER — A prayer you actually mean.`;
+    case "fathers-day":
+      return `
+NARRATIVE ARC: A LETTER HE'LL NEVER ASK FOR
+- Pages 5-6: THE MAN — His hands, silences, way of showing up.
+- Pages 7-8: FIRST MEMORIES — The first time you realized he was human.
+- Pages 9-10: THE QUIET SACRIFICES — Overtime, worry, "I'm fine."
+- Pages 11-12: HIS LESSONS — Demonstrations, not lectures.
+- Pages 13-14: HIS HUMANITY — Dad jokes, embarrassing moments, stubbornness.
+- Pages 15-16: WHAT I BECAME BECAUSE OF HIM — The inheritance.
+- Pages 17-18: WHAT I NEVER SAID — Make the words count.
+- Pages 19-20: GRATITUDE — Specific, earned, overdue.`;
+    case "farewell":
+      return `
+NARRATIVE ARC: THE ART OF GOODBYE
+- Pages 5-6: THE BEGINNING — When this chapter started.
+- Pages 7-8: THE GOLDEN MOMENTS — In present tense. Make them live again.
+- Pages 9-10: THE LAUGHTER — Inside jokes, midnight conversations.
+- Pages 11-12: THE IMPACT — The architecture of influence.
+- Pages 13-14: WHAT I'LL CARRY — Permanent marks on character.
+- Pages 15-16: THE HARD PART — The ache, honestly.
+- Pages 17-18: WHAT I WANT YOU TO KNOW — No pretense. Just truth.
+- Pages 19-20: NOT GOODBYE — The continuation.`;
+    case "graduation":
+      return `
+NARRATIVE ARC: THE BECOMING
+- Pages 5-6: THE BEGINNING — The "before" portrait.
+- Pages 7-8: THE CRUCIBLE — Friendships, failures, 2am breakthroughs.
+- Pages 9-10: THE HARD PARTS — What almost broke them. Respect the struggle.
+- Pages 11-12: THE JOY — Wild times, pure aliveness.
+- Pages 13-14: THE TRANSFORMATION — Who walked in vs. who walks out.
+- Pages 15-16: THE PEOPLE — Mentors, friends, unlikely teachers.
+- Pages 17-18: THE PRIDE — Specific, earned admiration.
+- Pages 19-20: THE OPEN ROAD — Possibility, not pressure.`;
+    case "roast":
+      return `
+NARRATIVE ARC: THE ROAST (A COMEDY IN CHAPTERS)
+- Pages 5-6: INTRODUCING THE DEFENDANT — True crime documentary, but the crime is their personality. Deadpan, devastating.
+- Pages 7-8: EXHIBIT A: HABITS — Court-filing precision, stand-up savagery.
+- Pages 9-10: THE GREATEST HITS — Legendary failures as epic stories.
+- Pages 11-12: DELUSION VS REALITY — Side-by-side comedy.
+- Pages 13-14: THE SAVAGE LINES — Sharp, specific, personal. Sting in the best way.
+- Pages 15-16: THE SIGNATURE MOVES — Eye-rolling behaviors with loving contempt.
+- Pages 17-18: THE TWIST — Drop the act. Real feelings beneath the comedy. Hits like a truck.
+- Pages 19-20: THE VERDICT — Backhanded love. Earned warmth.`;
+    case "birthday":
+    default:
+      return `
+NARRATIVE ARC: THE BOOK OF YOU
+- Pages 5-6: WHO YOU ARE — A portrait, not a list. Specific details, gestures, contradictions.
+- Pages 7-8: YOUR EVOLUTION — Chapters of life. A transformation, not a timeline.
+- Pages 9-10: THE MOMENTS THAT MATTER — Vivid scenes, not summaries.
+- Pages 11-12: YOUR BEAUTIFUL MESS — Quirks, contradictions, infuriating-and-lovable.
+- Pages 13-14: YOUR IMPACT — How knowing them changed the world around them.
+- Pages 15-16: WHAT SHOULD NEVER CHANGE — The non-negotiables.
+- Pages 17-18: THE UNSAID — Without armor.
+- Pages 19-20: YOUR NEXT CHAPTER — Specific, personal hopes.`;
+  }
+}
+
 function buildAdultFullRegenPrompt(order: any): string {
   const name = order.name;
   const theme = order.theme;
@@ -183,7 +277,11 @@ function buildAdultFullRegenPrompt(order: any): string {
   const quirks = extract("Quirks");
   const favoriteThings = extract("Favorite things");
   const funnyMoment = extract("Funny moment");
-  const occasion = extract("Occasion") || "Birthday";
+  const bestFriends = extract("Best friends");
+  const occasionRaw = extract("Occasion") || "birthday";
+  const occasion = occasionRaw.toLowerCase();
+
+  const occasionArc = getOccasionArc(occasion);
 
   return `You are a literary author writing a deeply personal, beautifully crafted book. This is NOT a children's book or a fairy tale. This is a mature, emotionally sophisticated piece of writing — think of it as a short novel, a memoir, or a collection of literary essays about a real person.
 
@@ -209,34 +307,38 @@ ${personality ? `- Personality: ${personality}` : ""}
 ${quirks ? `- Quirks: ${quirks}` : ""}
 ${favoriteThings ? `- Favorite things: ${favoriteThings}` : ""}
 ${funnyMoment ? `- Funny moment: ${funnyMoment}` : ""}
+${bestFriends ? `- Best friends: ${bestFriends}` : ""}
 ${details ? `- Personal Details: ${details}` : ""}
 ${interests ? `- Interests: ${interests}` : ""}
 ${memory ? `- Key Memory: ${memory}` : ""}
 
 BOOK STRUCTURE (EXACTLY 24 pages):
-Page 1: COVER — A compelling title featuring ${name}. Not cutesy — think book-jacket worthy.
+Page 1: COVER — A compelling title featuring ${name}. Book-jacket worthy. Occasion: ${occasion}.
 Page 2: DEDICATION — "For ${name}," — ${dedication || "a line that stops them breathing for a second"}. Like the opening line of a novel.
-Page 3: PRELUDE — An evocative opening moment. Include "[QR CODE HERE]" placeholder.
+Page 3: PRELUDE — ${tone === "Romantic" || occasion === "anniversary" || occasion === "wedding" ? `A meaningful song or poem reference. Include "[QR CODE HERE]" placeholder.` : `An evocative opening moment. Include "[QR CODE HERE]" placeholder.`}
 Page 4: CHAPTER ONE — Hook the reader. Set the emotional landscape with authority and intimacy.
-Pages 5-6: PORTRAIT — Paint ${name} like a novelist writes a protagonist — through specific details, gestures, contradictions.
-Pages 7-8: EVOLUTION — The chapters of their life. Not a timeline — a transformation.
-Pages 9-10: MOMENTS — Specific memories rendered in vivid detail. Write scenes, not summaries.
-Pages 11-12: THE MESS — Quirks, contradictions, infuriating and lovable in equal measure.
-Pages 13-14: IMPACT — How knowing them has changed the world around them.
-Pages 15-16: WHAT SHOULD NEVER CHANGE — The non-negotiable parts of who they are.
-Pages 17-18: THE UNSAID — What you've been meaning to say. Without armor.
-Pages 19-20: NEXT CHAPTER — Specific, personal hopes for their future.
-Page 21: THE LETTER — "Dear ${name}," — Raw, unfiltered, from the gut.
+${occasionArc}
+Page 21: THE LETTER — "Dear ${name}," — Raw, unfiltered, from the gut. The most honest page in the book.
 Page 22: IF YOU WERE A STORY — Literary metaphors. Specific and surprising.
-Page 23: THE LAST LINE — One powerful closing paragraph. Makes someone close the book slowly.
+Page 23: THE LAST LINE — One powerful closing paragraph. ${tone === "Humorous" ? "End with a laugh that hides something deeper." : "End with quiet, unshakeable truth."}
 Page 24: COLOPHON — "Made with ❤️ by KahaaniSeKitab"
 
+${occasion === "roast" ? `
+ROAST RULES:
+- Comedy Central Roast meets literary wit
+- Sharp, intelligent humor — not mean-spirited
+- Observational comedy that proves you REALLY know this person
+- Build running jokes through the book
+- 70% savage comedy, 30% genuine love (the twist at the end should HIT)
+- Reference specific details to make it personal, not generic
+` : `
 WRITING RULES:
-- This is PROSE, not poetry. Write in flowing paragraphs.
-- Each page should read like a chapter of a beautiful short novel
+- This is PROSE, not poetry. Flowing paragraphs.
+- Each page reads like a chapter of a beautiful short novel
 - 5-8 sentences per page — substantial, not sparse
 - Build emotional momentum: intrigue → warmth → depth → vulnerability → catharsis → hope
 - Use personal details to make it SPECIFIC — generic sentiment is the enemy
+`}
 
 Generate ALL 24 pages.`;
 }
