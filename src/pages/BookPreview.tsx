@@ -196,6 +196,28 @@ const BookPreview = () => {
         prefill: { name: order?.name || "" },
         theme: { color: "#F97316" },
         modal: { ondismiss: () => setPaying(false) },
+        method: {
+          upi: true,
+          card: true,
+          netbanking: true,
+          wallet: true,
+emi: false,
+          paylater: true,
+        },
+        config: {
+          display: {
+            blocks: {
+              upi: {
+                name: "Pay using UPI",
+                instruments: [
+                  { method: "upi", flows: ["qr", "collect", "intent"] },
+                ],
+              },
+            },
+            sequence: ["block.upi"],
+            preferences: { show_default_blocks: true },
+          },
+        },
       };
 
       const rzp = new window.Razorpay(options);
