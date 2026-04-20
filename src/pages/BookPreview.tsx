@@ -207,14 +207,20 @@ emi: false,
         config: {
           display: {
             blocks: {
-              upi: {
-                name: "Pay using UPI",
+              upi_id: {
+                name: "Pay using UPI ID",
                 instruments: [
-                  { method: "upi", flows: ["qr", "collect", "intent"] },
+                  { method: "upi", flows: ["collect", "intent"] },
+                ],
+              },
+              upi_qr: {
+                name: "Scan QR to Pay",
+                instruments: [
+                  { method: "upi", flows: ["qr"] },
                 ],
               },
             },
-            sequence: ["block.upi"],
+            sequence: ["block.upi_id", "block.upi_qr"],
             preferences: { show_default_blocks: true },
           },
         },
