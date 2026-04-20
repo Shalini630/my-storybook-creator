@@ -201,7 +201,7 @@ const BookPreview = () => {
           card: true,
           netbanking: true,
           wallet: true,
-ND          emi: false,
+emi: false,
           paylater: true,
         },
         config: {
