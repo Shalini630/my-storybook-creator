@@ -531,6 +531,33 @@ emi: false,
             </div>
           </div>
 
+          {/* Memory photos preview */}
+          {Array.isArray(order?.memory_photos) && order.memory_photos.length > 0 && (
+            <div className="mt-10 rounded-2xl border border-border bg-card p-6">
+              <h3 className="mb-1 font-display text-xl font-bold text-foreground">Your Memory Photos</h3>
+              <p className="mb-4 font-body text-sm text-muted-foreground">
+                These {order.memory_photos.length} photo{order.memory_photos.length > 1 ? "s" : ""} you uploaded help inspire the illustrations and story moments in your book.
+              </p>
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
+                {order.memory_photos.map((mp: { url: string; caption: string }, i: number) => (
+                  <div key={i} className="group relative overflow-hidden rounded-lg border border-border">
+                    <img
+                      src={mp.url}
+                      alt={mp.caption || `Memory ${i + 1}`}
+                      className="aspect-square w-full object-cover transition-transform group-hover:scale-105"
+                      loading="lazy"
+                    />
+                    {mp.caption && (
+                      <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 to-transparent p-2">
+                        <p className="font-body text-xs text-white line-clamp-2">{mp.caption}</p>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Actions */}
           <div className="mt-10 rounded-2xl border border-border bg-card p-6 text-center">
             <h3 className="mb-2 font-display text-xl font-bold text-foreground">Love Your Book?</h3>
