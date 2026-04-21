@@ -198,6 +198,19 @@ const CreateBook = () => {
         }
       }
 
+      // Upload extra memory photos
+      const memoryPhotoUrls: { url: string; caption: string }[] = [];
+      for (let i = 0; i < childData.memoryPhotos.length; i++) {
+        const mp = childData.memoryPhotos[i];
+        const ext = mp.file.name.split(".").pop() || "jpg";
+        const path = `${user.id}/memory-${Date.now()}-${i}.${ext}`;
+        const { error: upErr } = await supabase.storage.from("subject-photos").upload(path, mp.file, { upsert: false });
+        if (!upErr) {
+          const { data: signed } = await supabase.storage.from("subject-photos").createSignedUrl(path, 60 * 60 * 24 * 7);
+          if (signed?.signedUrl) memoryPhotoUrls.push({ url: signed.signedUrl, caption: mp.caption });
+        }
+      }
+
       const personalityDetails = [
         `Occasion: ${childData.occasion}`,
         `Personality: ${childData.personality.join(", ")}`,
@@ -217,6 +230,7 @@ const CreateBook = () => {
         childData.futureWish && `Future wish: ${childData.futureWish}`,
         childData.songName && `Song: ${childData.songName}`,
         childData.songWhy && `Song meaning: ${childData.songWhy}`,
+        memoryPhotoUrls.length > 0 && `Memory photo captions: ${memoryPhotoUrls.map(m => m.caption).filter(Boolean).join(" | ")}`,
       ].filter(Boolean).join(". ");
 
       const { data: order, error: insertError } = await supabase
