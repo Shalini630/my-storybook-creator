@@ -19,6 +19,14 @@ import bookCover5 from "@/assets/book-cover-5.jpg";
 import bookCover6 from "@/assets/book-cover-6.jpg";
 import bookCover7 from "@/assets/book-cover-7.jpg";
 import bookCover8 from "@/assets/book-cover-8.jpg";
+import adultRomance from "@/assets/adult-cover-romance.jpg";
+import adultMystery from "@/assets/adult-cover-mystery.jpg";
+import adultTravel from "@/assets/adult-cover-travel.jpg";
+import adultScifi from "@/assets/adult-cover-scifi.jpg";
+import adultComedy from "@/assets/adult-cover-comedy.jpg";
+import adultMemoir from "@/assets/adult-cover-memoir.jpg";
+import adultFantasy from "@/assets/adult-cover-fantasy.jpg";
+import adultMotivation from "@/assets/adult-cover-motivation.jpg";
 
 const kidThemes = [
   { id: "forest", label: "Enchanted Forest", img: bookCover1, emoji: "🌳" },
@@ -32,14 +40,14 @@ const kidThemes = [
 ];
 
 const adultThemes = [
-  { id: "romance", label: "Love Story", img: bookCover1, emoji: "💕" },
-  { id: "mystery", label: "Mystery Thriller", img: bookCover2, emoji: "🔍" },
-  { id: "travel", label: "Travel Memoir", img: bookCover3, emoji: "✈️" },
-  { id: "scifi", label: "Sci-Fi Epic", img: bookCover4, emoji: "🤖" },
-  { id: "comedy", label: "Comedy & Satire", img: bookCover5, emoji: "😂" },
-  { id: "memoir", label: "Life Story", img: bookCover6, emoji: "📖" },
-  { id: "fantasy", label: "Fantasy Quest", img: bookCover7, emoji: "⚔️" },
-  { id: "motivation", label: "Inspirational", img: bookCover8, emoji: "🌟" },
+  { id: "romance", label: "Love Story", img: adultRomance, emoji: "💕" },
+  { id: "mystery", label: "Mystery Thriller", img: adultMystery, emoji: "🔍" },
+  { id: "travel", label: "Travel Memoir", img: adultTravel, emoji: "✈️" },
+  { id: "scifi", label: "Sci-Fi Epic", img: adultScifi, emoji: "🤖" },
+  { id: "comedy", label: "Comedy & Satire", img: adultComedy, emoji: "😂" },
+  { id: "memoir", label: "Life Story", img: adultMemoir, emoji: "📖" },
+  { id: "fantasy", label: "Fantasy Quest", img: adultFantasy, emoji: "⚔️" },
+  { id: "motivation", label: "Inspirational", img: adultMotivation, emoji: "🌟" },
 ];
 
 const occasions = [
