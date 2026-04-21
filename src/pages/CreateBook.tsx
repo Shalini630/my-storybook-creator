@@ -607,8 +607,8 @@ const CreateBook = () => {
                       multiple
                       onChange={(e) => {
                         const files = Array.from(e.target.files || []);
-                        const next = files.slice(0, 6).map(file => ({ file, preview: URL.createObjectURL(file), caption: "" }));
-                        setForm({ ...form, memoryPhotos: [...form.memoryPhotos, ...next].slice(0, 6) });
+                        const next = files.map(file => ({ file, preview: URL.createObjectURL(file), caption: "" }));
+                        setForm({ ...form, memoryPhotos: [...form.memoryPhotos, ...next].slice(0, 12) });
                       }}
                       className="hidden"
                     />
@@ -641,7 +641,7 @@ const CreateBook = () => {
                       ))}
                     </div>
                   )}
-                  <p className="font-body text-xs text-muted-foreground">Up to 6 photos. We'll use the captions as story prompts.</p>
+                  <p className="font-body text-xs text-muted-foreground">Up to 12 photos. We'll use the captions as story prompts.</p>
                 </div>
               </motion.div>
             )}
