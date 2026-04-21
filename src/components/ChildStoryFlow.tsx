@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { ArrowLeft, ArrowRight, Upload, Sparkles, Loader2, Music } from "lucide-react";
+import { ArrowLeft, ArrowRight, Upload, Sparkles, Loader2, Music, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -48,6 +48,7 @@ export interface ChildFormData {
   bookSize: "40" | "60" | "80" | "100";
   coverType: "softcover" | "hardcover";
   dedication: string;
+  memoryPhotos: { file: File; preview: string; caption: string }[];
 }
 
 const CHILD_STEPS = 11;
@@ -122,6 +123,7 @@ const ChildStoryFlow = ({ onComplete, generating }: ChildStoryFlowProps) => {
     bookSize: "40",
     coverType: "softcover",
     dedication: "",
+    memoryPhotos: [],
   });
 
   const n = form.name || "them";
@@ -232,24 +234,80 @@ const ChildStoryFlow = ({ onComplete, generating }: ChildStoryFlowProps) => {
           </motion.div>
         )}
 
-        {/* Step 2: Photo */}
+        {/* Step 2: Photo + Memory Photos */}
         {step === 2 && (
           <motion.div key="c2" {...anim} className="space-y-6">
             <div className="text-center">
-              <h2 className="mb-2 font-display text-2xl font-bold text-foreground">Upload a photo of {n} 📸</h2>
-              <p className="font-body text-muted-foreground">Optional but magical — we can place their face in the storybook! ✨</p>
+              <h2 className="mb-2 font-display text-2xl font-bold text-foreground">Upload photos of {n} 📸</h2>
+              <p className="font-body text-muted-foreground">Optional but magical — we can place {n} in the storybook! ✨</p>
             </div>
-            <label className="flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-border p-10 transition-colors hover:border-primary/50">
-              {form.photoPreview ? (
-                <img src={form.photoPreview} alt="Preview" className="h-32 w-32 rounded-xl object-cover shadow-md" />
-              ) : (
-                <>
-                  <Upload className="h-10 w-10 text-muted-foreground" />
-                  <span className="font-body text-sm text-muted-foreground">Click to upload a photo</span>
-                </>
+
+            {/* Main subject photo */}
+            <div>
+              <Label className="font-body font-semibold">Main photo of {n} (face will be used in illustrations)</Label>
+              <label className="mt-2 flex cursor-pointer flex-col items-center justify-center gap-3 rounded-2xl border-2 border-dashed border-border p-8 transition-colors hover:border-primary/50">
+                {form.photoPreview ? (
+                  <img src={form.photoPreview} alt="Preview" className="h-32 w-32 rounded-xl object-cover shadow-md" />
+                ) : (
+                  <>
+                    <Upload className="h-10 w-10 text-muted-foreground" />
+                    <span className="font-body text-sm text-muted-foreground">Click to upload a photo</span>
+                  </>
+                )}
+                <input type="file" accept="image/*" onChange={handlePhotoChange} className="hidden" />
+              </label>
+            </div>
+
+            {/* Extra memory photos */}
+            <div className="space-y-3 rounded-2xl border border-border bg-card p-5">
+              <div>
+                <Label className="font-body font-semibold">Add more photos for the story 🖼️</Label>
+                <p className="font-body text-xs text-muted-foreground">Family, pets, friends, places — we'll weave them into the book. (Up to 12, optional)</p>
+              </div>
+              <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border p-4 transition-colors hover:border-primary/50">
+                <Upload className="h-5 w-5 text-muted-foreground" />
+                <span className="font-body text-sm text-muted-foreground">Click to upload photos</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files || []);
+                    const next = files.map(file => ({ file, preview: URL.createObjectURL(file), caption: "" }));
+                    setForm({ ...form, memoryPhotos: [...form.memoryPhotos, ...next].slice(0, 12) });
+                  }}
+                  className="hidden"
+                />
+              </label>
+
+              {form.memoryPhotos.length > 0 && (
+                <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+                  {form.memoryPhotos.map((mp, i) => (
+                    <div key={i} className="relative">
+                      <img src={mp.preview} alt={`Memory ${i + 1}`} className="aspect-square w-full rounded-lg object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => setForm({ ...form, memoryPhotos: form.memoryPhotos.filter((_, idx) => idx !== i) })}
+                        className="absolute right-1 top-1 rounded-full bg-background/90 p-1 shadow"
+                        aria-label="Remove photo"
+                      >
+                        <X className="h-3.5 w-3.5" />
+                      </button>
+                      <Input
+                        placeholder="Caption (optional)"
+                        value={mp.caption}
+                        onChange={e => {
+                          const updated = [...form.memoryPhotos];
+                          updated[i] = { ...updated[i], caption: e.target.value };
+                          setForm({ ...form, memoryPhotos: updated });
+                        }}
+                        className="mt-1.5 text-xs"
+                      />
+                    </div>
+                  ))}
+                </div>
               )}
-              <input type="file" accept="image/*" onChange={handlePhotoChange} className="hidden" />
-            </label>
+            </div>
           </motion.div>
         )}
 
