@@ -70,6 +70,7 @@ export type Database = {
           id: string
           illustrations: Json | null
           interests: string | null
+          memory_photos: Json | null
           name: string
           paid_at: string | null
           payment_id: string | null
@@ -105,6 +106,7 @@ export type Database = {
           id?: string
           illustrations?: Json | null
           interests?: string | null
+          memory_photos?: Json | null
           name: string
           paid_at?: string | null
           payment_id?: string | null
@@ -140,6 +142,7 @@ export type Database = {
           id?: string
           illustrations?: Json | null
           interests?: string | null
+          memory_photos?: Json | null
           name?: string
           paid_at?: string | null
           payment_id?: string | null
