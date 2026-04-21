@@ -842,6 +842,7 @@ const CreateBook = () => {
                         hobbies: form.hobbies || null,
                         favorite_memory: form.memorableAdventure || form.favoriteMemory || null,
                         photo_url: photoUrl,
+                        memory_photos: memoryPhotoUrls as any,
                         price,
                         status: "pending",
                       })
