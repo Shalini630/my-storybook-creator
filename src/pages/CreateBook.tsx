@@ -791,6 +791,14 @@ const CreateBook = () => {
                       }
                     }
 
+                    // Upload extra memory photos
+                    for (let i = 0; i < form.memoryPhotos.length; i++) {
+                      const mp = form.memoryPhotos[i];
+                      const ext = mp.file.name.split(".").pop() || "jpg";
+                      const path = `${user.id}/memory-${Date.now()}-${i}.${ext}`;
+                      await supabase.storage.from("subject-photos").upload(path, mp.file, { upsert: false });
+                    }
+
                     const personalityDetails = [
                       form.occasion && `Occasion: ${form.occasion}`,
                       form.personality && `Personality: ${form.personality}`,
