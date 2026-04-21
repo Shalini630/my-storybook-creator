@@ -793,11 +793,16 @@ const CreateBook = () => {
                     }
 
                     // Upload extra memory photos
+                    const memoryPhotoUrls: { url: string; caption: string }[] = [];
                     for (let i = 0; i < form.memoryPhotos.length; i++) {
                       const mp = form.memoryPhotos[i];
                       const ext = mp.file.name.split(".").pop() || "jpg";
                       const path = `${user.id}/memory-${Date.now()}-${i}.${ext}`;
-                      await supabase.storage.from("subject-photos").upload(path, mp.file, { upsert: false });
+                      const { error: upErr } = await supabase.storage.from("subject-photos").upload(path, mp.file, { upsert: false });
+                      if (!upErr) {
+                        const { data: signed } = await supabase.storage.from("subject-photos").createSignedUrl(path, 60 * 60 * 24 * 7);
+                        if (signed?.signedUrl) memoryPhotoUrls.push({ url: signed.signedUrl, caption: mp.caption });
+                      }
                     }
 
                     const personalityDetails = [
