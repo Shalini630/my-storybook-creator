@@ -250,6 +250,7 @@ const CreateBook = () => {
           interests: childData.favoriteActivity || null,
           hobbies: childData.favoriteToy || null,
           photo_url: photoUrl,
+          memory_photos: memoryPhotoUrls as any,
           price,
           status: "pending",
         })
