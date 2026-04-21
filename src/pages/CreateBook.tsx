@@ -198,6 +198,19 @@ const CreateBook = () => {
         }
       }
 
+      // Upload extra memory photos
+      const memoryPhotoUrls: { url: string; caption: string }[] = [];
+      for (let i = 0; i < childData.memoryPhotos.length; i++) {
+        const mp = childData.memoryPhotos[i];
+        const ext = mp.file.name.split(".").pop() || "jpg";
+        const path = `${user.id}/memory-${Date.now()}-${i}.${ext}`;
+        const { error: upErr } = await supabase.storage.from("subject-photos").upload(path, mp.file, { upsert: false });
+        if (!upErr) {
+          const { data: signed } = await supabase.storage.from("subject-photos").createSignedUrl(path, 60 * 60 * 24 * 7);
+          if (signed?.signedUrl) memoryPhotoUrls.push({ url: signed.signedUrl, caption: mp.caption });
+        }
+      }
+
       const personalityDetails = [
         `Occasion: ${childData.occasion}`,
         `Personality: ${childData.personality.join(", ")}`,
@@ -217,6 +230,7 @@ const CreateBook = () => {
         childData.futureWish && `Future wish: ${childData.futureWish}`,
         childData.songName && `Song: ${childData.songName}`,
         childData.songWhy && `Song meaning: ${childData.songWhy}`,
+        memoryPhotoUrls.length > 0 && `Memory photo captions: ${memoryPhotoUrls.map(m => m.caption).filter(Boolean).join(" | ")}`,
       ].filter(Boolean).join(". ");
 
       const { data: order, error: insertError } = await supabase
@@ -607,8 +621,8 @@ const CreateBook = () => {
                       multiple
                       onChange={(e) => {
                         const files = Array.from(e.target.files || []);
-                        const next = files.slice(0, 6).map(file => ({ file, preview: URL.createObjectURL(file), caption: "" }));
-                        setForm({ ...form, memoryPhotos: [...form.memoryPhotos, ...next].slice(0, 6) });
+                        const next = files.map(file => ({ file, preview: URL.createObjectURL(file), caption: "" }));
+                        setForm({ ...form, memoryPhotos: [...form.memoryPhotos, ...next].slice(0, 12) });
                       }}
                       className="hidden"
                     />
@@ -641,7 +655,7 @@ const CreateBook = () => {
                       ))}
                     </div>
                   )}
-                  <p className="font-body text-xs text-muted-foreground">Up to 6 photos. We'll use the captions as story prompts.</p>
+                  <p className="font-body text-xs text-muted-foreground">Up to 12 photos. We'll use the captions as story prompts.</p>
                 </div>
               </motion.div>
             )}
@@ -775,6 +789,14 @@ const CreateBook = () => {
                         const { data: signed } = await supabase.storage.from("subject-photos").createSignedUrl(path, 60 * 60 * 24 * 7);
                         photoUrl = signed?.signedUrl ?? null;
                       }
+                    }
+
+                    // Upload extra memory photos
+                    for (let i = 0; i < form.memoryPhotos.length; i++) {
+                      const mp = form.memoryPhotos[i];
+                      const ext = mp.file.name.split(".").pop() || "jpg";
+                      const path = `${user.id}/memory-${Date.now()}-${i}.${ext}`;
+                      await supabase.storage.from("subject-photos").upload(path, mp.file, { upsert: false });
                     }
 
                     const personalityDetails = [
