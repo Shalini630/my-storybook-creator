@@ -419,14 +419,14 @@ WRITING RULES:
 `}
 
 TONE GUIDANCE (${tone}):
-${{
+${({
     "Humorous": "Witty and warm, like a best man speech that makes everyone laugh AND cry. Smart humor, not slapstick.",
     "Heartfelt": "Tender and genuine, like a letter you'd write at midnight. Vulnerability is strength here.",
     "Adventurous": "Bold and vivid, like travel writing about a person instead of a place. Make their life feel epic.",
     "Inspirational": "Powerful and uplifting, like a TED talk wrapped in a love letter. Conviction without cliché.",
     "Romantic": "Intimate and sensual (tastefully), like the best passages of a love story. Heat and tenderness.",
     "Mysterious": "Atmospheric and intriguing, like literary fiction. Reveal the subject layer by layer.",
-  }[tone] || "Authentic and moving. Write like you mean every word."}
+  } as Record<string, string>)[tone] || "Authentic and moving. Write like you mean every word."}
 
 Generate ALL 24 pages.`;
 }
