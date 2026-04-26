@@ -37,6 +37,11 @@ const Navbar = () => {
               <Link to="/profile" className="font-body text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
                 Profile
               </Link>
+              {isAdmin && (
+                <Link to="/admin/marketing" className="flex items-center gap-1 font-body text-sm font-medium text-primary transition-opacity hover:opacity-80">
+                  <Sparkles className="h-3.5 w-3.5" /> Marketing
+                </Link>
+              )}
               <div className="flex items-center gap-3">
                 <Link to="/profile" className="flex items-center gap-1.5 font-body text-sm text-muted-foreground transition-colors hover:text-foreground">
                   <User className="h-4 w-4" />
