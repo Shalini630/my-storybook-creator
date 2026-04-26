@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, LogOut, User } from "lucide-react";
+import { Menu, X, LogOut, User, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/contexts/AuthContext";
+import { useIsAdmin } from "@/hooks/useIsAdmin";
 import logo from "@/assets/logo.png";
 
 const Navbar = () => {
   const [open, setOpen] = useState(false);
   const { user, signOut } = useAuth();
+  const { isAdmin } = useIsAdmin();
 
   return (
     <nav className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-md">
@@ -35,6 +37,11 @@ const Navbar = () => {
               <Link to="/profile" className="font-body text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
                 Profile
               </Link>
+              {isAdmin && (
+                <Link to="/admin/marketing" className="flex items-center gap-1 font-body text-sm font-medium text-primary transition-opacity hover:opacity-80">
+                  <Sparkles className="h-3.5 w-3.5" /> Marketing
+                </Link>
+              )}
               <div className="flex items-center gap-3">
                 <Link to="/profile" className="flex items-center gap-1.5 font-body text-sm text-muted-foreground transition-colors hover:text-foreground">
                   <User className="h-4 w-4" />
@@ -72,6 +79,11 @@ const Navbar = () => {
               <>
                 <Link to="/my-books" className="font-body text-sm font-medium text-muted-foreground" onClick={() => setOpen(false)}>My Books</Link>
                 <Link to="/profile" className="font-body text-sm font-medium text-muted-foreground" onClick={() => setOpen(false)}>Profile</Link>
+                {isAdmin && (
+                  <Link to="/admin/marketing" className="flex items-center gap-1 font-body text-sm font-medium text-primary" onClick={() => setOpen(false)}>
+                    <Sparkles className="h-3.5 w-3.5" /> Marketing
+                  </Link>
+                )}
                 <Button variant="outline" size="sm" onClick={() => { signOut(); setOpen(false); }} className="gap-1.5 font-body">
                   <LogOut className="h-3.5 w-3.5" /> Sign Out
                 </Button>
