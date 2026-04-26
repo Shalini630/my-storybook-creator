@@ -55,6 +55,24 @@ export type Database = {
           },
         ]
       }
+      active_sessions: {
+        Row: {
+          session_token: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          session_token: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          session_token?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       orders: {
         Row: {
           age: string | null
