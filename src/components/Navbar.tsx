@@ -32,11 +32,14 @@ const Navbar = () => {
               <Link to="/my-books" className="font-body text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
                 My Books
               </Link>
+              <Link to="/profile" className="font-body text-sm font-medium text-muted-foreground transition-colors hover:text-foreground">
+                Profile
+              </Link>
               <div className="flex items-center gap-3">
-                <span className="flex items-center gap-1.5 font-body text-sm text-muted-foreground">
+                <Link to="/profile" className="flex items-center gap-1.5 font-body text-sm text-muted-foreground transition-colors hover:text-foreground">
                   <User className="h-4 w-4" />
                   {user.user_metadata?.full_name || user.email?.split("@")[0]}
-                </span>
+                </Link>
                 <Button variant="outline" size="sm" onClick={signOut} className="gap-1.5 font-body text-sm">
                   <LogOut className="h-3.5 w-3.5" /> Sign Out
                 </Button>
