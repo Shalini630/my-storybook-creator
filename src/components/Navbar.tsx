@@ -69,9 +69,13 @@ const Navbar = () => {
             <Link to="/" className="font-body text-sm font-medium text-muted-foreground" onClick={() => setOpen(false)}>Book Gallery</Link>
             <Link to="/create" className="font-body text-sm font-medium text-muted-foreground" onClick={() => setOpen(false)}>Create a Book</Link>
             {user ? (
-              <Button variant="outline" size="sm" onClick={() => { signOut(); setOpen(false); }} className="gap-1.5 font-body">
-                <LogOut className="h-3.5 w-3.5" /> Sign Out
-              </Button>
+              <>
+                <Link to="/my-books" className="font-body text-sm font-medium text-muted-foreground" onClick={() => setOpen(false)}>My Books</Link>
+                <Link to="/profile" className="font-body text-sm font-medium text-muted-foreground" onClick={() => setOpen(false)}>Profile</Link>
+                <Button variant="outline" size="sm" onClick={() => { signOut(); setOpen(false); }} className="gap-1.5 font-body">
+                  <LogOut className="h-3.5 w-3.5" /> Sign Out
+                </Button>
+              </>
             ) : (
               <>
                 <Button asChild variant="ghost" size="sm" className="font-body justify-start">
