@@ -32,6 +32,7 @@ const App = () => (
             <Route path="/create" element={<CreateBook />} />
             <Route path="/my-books" element={<MyBooks />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/admin/marketing" element={<AdminMarketing />} />
             <Route path="/preview/:orderId" element={<BookPreview />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
