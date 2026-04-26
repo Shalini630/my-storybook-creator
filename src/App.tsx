@@ -15,6 +15,7 @@ import ForgotPassword from "./pages/ForgotPassword.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
 import BookPreview from "./pages/BookPreview.tsx";
 import Profile from "./pages/Profile.tsx";
+import AdminMarketing from "./pages/AdminMarketing.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
