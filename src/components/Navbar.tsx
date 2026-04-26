@@ -79,6 +79,11 @@ const Navbar = () => {
               <>
                 <Link to="/my-books" className="font-body text-sm font-medium text-muted-foreground" onClick={() => setOpen(false)}>My Books</Link>
                 <Link to="/profile" className="font-body text-sm font-medium text-muted-foreground" onClick={() => setOpen(false)}>Profile</Link>
+                {isAdmin && (
+                  <Link to="/admin/marketing" className="flex items-center gap-1 font-body text-sm font-medium text-primary" onClick={() => setOpen(false)}>
+                    <Sparkles className="h-3.5 w-3.5" /> Marketing
+                  </Link>
+                )}
                 <Button variant="outline" size="sm" onClick={() => { signOut(); setOpen(false); }} className="gap-1.5 font-body">
                   <LogOut className="h-3.5 w-3.5" /> Sign Out
                 </Button>
