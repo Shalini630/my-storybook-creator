@@ -14,6 +14,7 @@ import Auth from "./pages/Auth.tsx";
 import ForgotPassword from "./pages/ForgotPassword.tsx";
 import ResetPassword from "./pages/ResetPassword.tsx";
 import BookPreview from "./pages/BookPreview.tsx";
+import TrackOrder from "./pages/TrackOrder.tsx";
 import Profile from "./pages/Profile.tsx";
 import AdminMarketing from "./pages/AdminMarketing.tsx";
 import NotFound from "./pages/NotFound.tsx";
@@ -34,6 +35,7 @@ const App = () => (
             <Route path="/profile" element={<Profile />} />
             <Route path="/admin/marketing" element={<AdminMarketing />} />
             <Route path="/preview/:orderId" element={<BookPreview />} />
+            <Route path="/track/:orderId" element={<TrackOrder />} />
             <Route path="/privacy" element={<Privacy />} />
             <Route path="/terms" element={<Terms />} />
             <Route path="/contact" element={<Contact />} />
