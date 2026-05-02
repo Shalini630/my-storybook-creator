@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Book, Eye, CreditCard, Clock, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
+import { Book, Eye, CreditCard, Clock, CheckCircle, AlertCircle, Loader2, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -130,12 +130,20 @@ const MyBooks = () => {
                     </div>
 
                     {/* Actions */}
-                    <div className="flex flex-shrink-0 items-center">
+                    <div className="flex flex-shrink-0 flex-col items-stretch gap-1.5">
                       {(order.status === "preview" || order.status === "paid") && (
                         <Button variant="outline" size="sm" asChild className="font-body text-xs">
                           <Link to={`/preview/${order.id}`}>
                             <Eye className="mr-1.5 h-3.5 w-3.5" />
                             {order.status === "paid" ? "Read" : "Preview"}
+                          </Link>
+                        </Button>
+                      )}
+                      {order.status === "paid" && (
+                        <Button size="sm" asChild className="bg-gradient-primary font-body text-xs text-primary-foreground hover:opacity-90">
+                          <Link to={`/track/${order.id}`}>
+                            <Truck className="mr-1.5 h-3.5 w-3.5" />
+                            Track Order
                           </Link>
                         </Button>
                       )}

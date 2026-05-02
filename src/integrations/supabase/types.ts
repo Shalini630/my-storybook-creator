@@ -78,9 +78,12 @@ export type Database = {
           age: string | null
           audience: string
           book_size: string | null
+          courier_partner: string | null
           cover_type: string
           created_at: string
           dedication: string | null
+          delivered_at: string | null
+          estimated_delivery: string | null
           favorite_character: string | null
           favorite_memory: string | null
           gender: string | null
@@ -95,8 +98,10 @@ export type Database = {
           personal_message: string | null
           photo_url: string | null
           price: number
+          production_stage: string
           razorpay_order_id: string | null
           relationship: string | null
+          shipped_at: string | null
           shipping_address: string | null
           shipping_city: string | null
           shipping_name: string | null
@@ -107,6 +112,7 @@ export type Database = {
           story_content: Json | null
           theme: string
           tone: string | null
+          tracking_number: string | null
           updated_at: string
           user_id: string
         }
@@ -114,9 +120,12 @@ export type Database = {
           age?: string | null
           audience: string
           book_size?: string | null
+          courier_partner?: string | null
           cover_type: string
           created_at?: string
           dedication?: string | null
+          delivered_at?: string | null
+          estimated_delivery?: string | null
           favorite_character?: string | null
           favorite_memory?: string | null
           gender?: string | null
@@ -131,8 +140,10 @@ export type Database = {
           personal_message?: string | null
           photo_url?: string | null
           price: number
+          production_stage?: string
           razorpay_order_id?: string | null
           relationship?: string | null
+          shipped_at?: string | null
           shipping_address?: string | null
           shipping_city?: string | null
           shipping_name?: string | null
@@ -143,6 +154,7 @@ export type Database = {
           story_content?: Json | null
           theme: string
           tone?: string | null
+          tracking_number?: string | null
           updated_at?: string
           user_id: string
         }
@@ -150,9 +162,12 @@ export type Database = {
           age?: string | null
           audience?: string
           book_size?: string | null
+          courier_partner?: string | null
           cover_type?: string
           created_at?: string
           dedication?: string | null
+          delivered_at?: string | null
+          estimated_delivery?: string | null
           favorite_character?: string | null
           favorite_memory?: string | null
           gender?: string | null
@@ -167,8 +182,10 @@ export type Database = {
           personal_message?: string | null
           photo_url?: string | null
           price?: number
+          production_stage?: string
           razorpay_order_id?: string | null
           relationship?: string | null
+          shipped_at?: string | null
           shipping_address?: string | null
           shipping_city?: string | null
           shipping_name?: string | null
@@ -179,6 +196,7 @@ export type Database = {
           story_content?: Json | null
           theme?: string
           tone?: string | null
+          tracking_number?: string | null
           updated_at?: string
           user_id?: string
         }
